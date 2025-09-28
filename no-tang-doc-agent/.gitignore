@@ -1,0 +1,8 @@
+*log*
+*tmp*
+*temp*
+**/out
+
+.idea/
+.vscode/
+__pycache__/
