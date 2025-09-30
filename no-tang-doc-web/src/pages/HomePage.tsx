@@ -1,13 +1,36 @@
-import React from 'react';
+// src/pages/HomePage.tsx (命名导出版本)
+import { Header } from '../components/Header';
+import { Hero } from '../components/Hero';
+import { Features } from '../components/Features';
+import { Footer } from '../components/Footer';
 
-export default function HomePage() {
+export interface HomePageProps {
+    onNavigateToAuth: (mode: 'login' | 'register') => void;
+    onNavigateToDashboard: () => void;
+    onNavigateHome: () => void;
+    onStartUploading: () => void;
+}
+
+export function HomePage(props: HomePageProps) {
+    const {
+        onNavigateToAuth,
+        onNavigateToDashboard,
+        onNavigateHome,
+        onStartUploading
+    } = props;
+
     return (
-        <div style={{ padding: 24 }}>
-            <h2>HomePage</h2>
-            <p>这是首页占位内容 (Step2).</p>
+        <div className="min-h-screen bg-background">
+            <Header
+                onNavigateToAuth={onNavigateToAuth}
+                onNavigateToDashboard={onNavigateToDashboard}
+                onNavigateHome={onNavigateHome}
+            />
+            <main>
+                <Hero onStartUploading={onStartUploading} />
+                <Features />
+            </main>
+            <Footer />
         </div>
     );
 }
-
-
-
