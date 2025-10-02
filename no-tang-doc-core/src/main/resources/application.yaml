@@ -20,6 +20,10 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.yaml
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
   security:
     oauth2:
       resourceserver:
@@ -57,6 +61,13 @@ keycloak:
   client:
     id: ${KEYCLOAK_CLIENT_ID:no-tang-doc-core}
     secret: ${KEYCLOAK_CLIENT_SECRET:z1VI8bpLpOnDsqa5TeIHsOmstdk1SdMc}
+
+app:
+  file:
+    max-size: 52428800 # 50MB
+    allowed-types: pdf,doc,docx,txt,png,jpg,jpeg,gif,zip,rar
+    storage-path-pattern: documents/{userId}/{year}/{month}/
+    presigned-url-expiration: 900 # 15分钟
 
 management:
   endpoints:
