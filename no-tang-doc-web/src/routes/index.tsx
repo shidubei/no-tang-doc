@@ -13,6 +13,7 @@ import {TagManagementPage} from "@/pages/TagManagementPage.tsx";
 import {MyTeamsPage} from "../pages/MyTeamsPage.tsx";
 import {TeamSpacePage} from "../pages/TeamSpacePage.tsx";
 import {useAuth} from "../components/AuthContext.tsx";
+import { AuthCallbackPage } from '../pages/AuthCallbackPage';
 
 function HomeRoute() {
     const navigate = useNavigate();
@@ -27,23 +28,26 @@ function HomeRoute() {
 }
 // Protected Route wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-    const { user } = useAuth();
+    const { isAuthenticated, isLoading } = useAuth();
 
-    if (!user) {
+    if (isLoading) {
+        return <div style={{ padding: '2rem', textAlign: 'center' }}>Checking authentication...</div>;
+    }
+    if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
-
     return <>{children}</>;
 }
 
 // Route wrapper to redirect authenticated users from auth pages
 function AuthRoute({ children }: { children: React.ReactNode }) {
-    const { user } = useAuth();
-
-    if (user) {
+    const { isAuthenticated, isLoading } = useAuth();
+    if (isLoading) {
+        return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
+    }
+    if (isAuthenticated) {
         return <Navigate to="/dashboard" replace />;
     }
-
     return <>{children}</>;
 }
 
@@ -51,9 +55,10 @@ export function AppRoutes() {
     return (
         <Suspense fallback={<div>Loading...</div>}>
             <Routes>
+                {/* OAuth callback (public) */}
+                <Route path="/auth/callback" element={<AuthCallbackPage/>} />
                 {/* Public routes */}
                 <Route path="/" element={<HomeRoute/>}/>
-                {/* Auth routes only UnAuth users can access*/}
                 <Route path="/login" element={
                     <AuthRoute>
                         <LoginPage/>
