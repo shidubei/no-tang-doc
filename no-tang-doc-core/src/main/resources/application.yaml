@@ -2,6 +2,8 @@ server:
   port: 8070
 
 spring:
+  profiles:
+    active: local
   application:
     name: no-tang-doc-core
   datasource:
@@ -40,13 +42,6 @@ spring:
             user-info-uri: http://localhost:8080/realms/ntdoc/protocol/openid-connect/userinfo
             jwk-set-uri: http://localhost:8080/realms/ntdoc/protocol/openid-connect/certs
             issuer-uri: http://localhost:8080/realms/ntdoc
-#  ai:
-#    openai:
-#      api-key: ${OPENAI_API_KEY:}
-#      chat:
-#        options:
-#          model: gpt-4.1-mini
-#          temperature: 0.2
 
 keycloak:
   realm: ntdoc

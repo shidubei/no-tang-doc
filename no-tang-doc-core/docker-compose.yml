@@ -75,12 +75,11 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/ntdoc/protocol/openid-connect/certs
 
       # 回调仍为浏览器可达的 localhost
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_REDIRECT_URI: http://localhost:8070/login/oauth2/code/*
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_REDIRECT_URI: http://localhost:3000/auth/callback
       KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
 
       KEYCLOAK_CLIENT_ID: no-tang-doc-core
-      KEYCLOAK_CLIENT_SECRET: no-tang-doc-core-test-secret
-      OPENAI_API_KEY: 
+      KEYCLOAK_CLIENT_SECRET: zZ7L79d7nwRHbrZruLZoZgsWQQI5MtCn
     depends_on:
       mysql:
         condition: service_healthy
