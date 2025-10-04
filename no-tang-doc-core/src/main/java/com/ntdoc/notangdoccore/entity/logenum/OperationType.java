@@ -6,6 +6,7 @@ public enum OperationType {
     DOWNLOAD_DOCUMENT,
     DELETE_DOCUMENT,
     SHARE_DOCUMENT,
+    UPDATE_DOCUMENT,
 
     // for AI_Agent
     AI_SUMMARIZE_DOCUMENT

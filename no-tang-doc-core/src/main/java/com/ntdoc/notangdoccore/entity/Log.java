@@ -31,6 +31,9 @@ public class Log {
     @Column
     private String actorName;
 
+    @Column
+    private Long userId;
+
     @Enumerated(EnumType.STRING)
     @Column
     private OperationType operationType;
@@ -42,7 +45,7 @@ public class Log {
     @Column
     private OperationStatus operationStatus;
 
-    @Column
+    @Column(name="message",columnDefinition = "TEXT")
     private String message;
 
     @CreationTimestamp
