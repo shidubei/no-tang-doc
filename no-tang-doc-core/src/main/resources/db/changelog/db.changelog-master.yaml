@@ -6,3 +6,7 @@ databaseChangeLog:
       file: db/changelog/0002-changelog-app-user.yaml
   - include:
       file: db/changelog/0003-changelog-app-user-pk.yaml
+  - include:
+      file: db/changelog/0004-changelog-tags-elemcoll.yaml
+  - include:
+      file: db/changelog/0005-changelog-metadata-elemcoll.yaml
