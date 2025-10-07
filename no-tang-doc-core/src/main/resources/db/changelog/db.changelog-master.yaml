@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - logicalFilePath: db/changelog/db.changelog-master.yaml
+  - include:
+      file: db/changelog/0001-initial-tables.yaml
+  - include:
+      file: db/changelog/0002-changelog-app-user.yaml
+  - include:
+      file: db/changelog/0003-changelog-app-user-pk.yaml
+  - include:
+      file: db/changelog/0004-create-document-table.yaml
