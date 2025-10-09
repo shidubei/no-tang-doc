@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 0005-create-document-metadata-251005
+      id: 0007-create-document-metadata-251005
       author: Chen Sirui
       preConditions:
         - tableExists:
