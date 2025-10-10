@@ -18,10 +18,13 @@ import java.time.Instant;
 public class UserOperationLogListener {
     private final LogRepository logRepository;
 
-    @Async
+    @Async("taskExecutor")
     @EventListener
     @Transactional
     public void handleUserOperation(UserOperationEvent event){
+        // 记录当前线程
+        log.info("Async thread: {}",Thread.currentThread().getName());
+
         try{
             Log logEntity = new Log();
             logEntity.setActorType(event.getActorType());
