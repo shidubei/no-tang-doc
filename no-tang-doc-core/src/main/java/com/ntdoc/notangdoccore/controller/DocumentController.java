@@ -3,10 +3,12 @@ package com.ntdoc.notangdoccore.controller;
 import com.ntdoc.notangdoccore.dto.common.ApiResponse;
 import com.ntdoc.notangdoccore.dto.document.*;
 import com.ntdoc.notangdoccore.entity.Document;
+import com.ntdoc.notangdoccore.entity.User;
 import com.ntdoc.notangdoccore.entity.logenum.ActorType;
 import com.ntdoc.notangdoccore.entity.logenum.OperationType;
 import com.ntdoc.notangdoccore.event.UserOperationEvent;
 import com.ntdoc.notangdoccore.service.DocumentService;
+import com.ntdoc.notangdoccore.service.UserSyncService;
 import com.ntdoc.notangdoccore.service.FileStorageService;
 import com.ntdoc.notangdoccore.service.impl.DigitalOceanSpacesService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,6 +41,7 @@ public class DocumentController {
     private final DocumentService documentService;
     //日志发布者
     private final ApplicationEventPublisher eventPublisher;
+    private final UserSyncService userSyncService;
 
     private final FileStorageService digitalOceanSpacesService;
 
@@ -72,13 +75,18 @@ public class DocumentController {
                     response.getDocumentId(), kcUserId);
 
             // 成功后记录上传成功的日志
+            User user = userSyncService.ensureFromJwt(jwt);
+            Long documentId = response.getDocumentId();
             String username = jwt.getClaimAsString("preferred_username");
+
 
             eventPublisher.publishEvent(
                     UserOperationEvent.success(
                             this,
                             ActorType.USER,
                             username,
+                            user.getId(),
+                            documentId,
                             OperationType.UPLOAD_DOCUMENT,
                             fileName
                     )
@@ -91,11 +99,14 @@ public class DocumentController {
             // 发布上传失败日志
             String username = jwt.getClaimAsString("preferred_username");
 
+            User user = userSyncService.ensureFromJwt(jwt);
+
             eventPublisher.publishEvent(
                     UserOperationEvent.fail(
                             this,
                             ActorType.USER,
                             username,
+                            user.getId(),
                             OperationType.UPLOAD_DOCUMENT,
                             fileName,
                             e.getMessage()
@@ -130,12 +141,15 @@ public class DocumentController {
             // 记录下载日志
             String username = jwt.getClaimAsString("preferred_username");
             String documentName = documentService.getDocumentById(documentId,kcUserId).getStoredFilename();
+            User user = userSyncService.ensureFromJwt(jwt);
 
             eventPublisher.publishEvent(
                     UserOperationEvent.success(
                             this,
                             ActorType.USER,
                             username,
+                            user.getId(),
+                            documentId,
                             OperationType.DOWNLOAD_DOCUMENT,
                             documentName
                     )
@@ -150,12 +164,14 @@ public class DocumentController {
             String username = jwt.getClaimAsString("preferred_username");
             String kcUserId = jwt.getClaimAsString("sub");
             String documentName = documentService.getDocumentById(documentId,kcUserId).getStoredFilename();
+            User user = userSyncService.ensureFromJwt(jwt);
 
             eventPublisher.publishEvent(
                     UserOperationEvent.fail(
                             this,
                             ActorType.USER,
                             username,
+                            user.getId(),
                             OperationType.DOWNLOAD_DOCUMENT,
                             documentName,
                             e.getMessage()
@@ -214,12 +230,15 @@ public class DocumentController {
         // 记录删除文档日志
         String username = jwt.getClaimAsString("preferred_username");
         String documentName =document.getStoredFilename();
+        User user = userSyncService.ensureFromJwt(jwt);
 
         eventPublisher.publishEvent(
                 UserOperationEvent.success(
                         this,
                         ActorType.USER,
                         username,
+                        user.getId(),
+                        documentId,
                         OperationType.DELETE_DOCUMENT,
                         documentName
                 )

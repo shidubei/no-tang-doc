@@ -10,8 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
-/*TODO:
-*  1. Log字段设计*/
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -39,6 +38,9 @@ public class Log {
     private OperationType operationType;
 
     @Column
+    private Long targetId;
+
+    @Column
     private String targetName;
 
     @Enumerated(EnumType.STRING)
@@ -49,5 +51,6 @@ public class Log {
     private String message;
 
     @CreationTimestamp
-    private Instant timestamp;
+    @Column
+    private Instant time;
 }
