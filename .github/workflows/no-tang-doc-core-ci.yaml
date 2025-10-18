@@ -69,6 +69,7 @@ jobs:
             no-tang-doc-core/target/site/jacoco/
             no-tang-doc-core/target/jacoco*.xml
             no-tang-doc-core/target/site/jacoco-ut/
+          compression-level: 9
 
       - name: Upload PMD reports
         if: always()
@@ -78,6 +79,7 @@ jobs:
           path: |
             no-tang-doc-core/target/pmd.xml
             no-tang-doc-core/target/site/pmd.html
+          compression-level: 9
 
       - name: Upload Checkstyle reports
         if: always()
@@ -87,3 +89,4 @@ jobs:
           path: |
             no-tang-doc-core/target/checkstyle-result.xml
             no-tang-doc-core/target/site/checkstyle.html
+          compression-level: 9
