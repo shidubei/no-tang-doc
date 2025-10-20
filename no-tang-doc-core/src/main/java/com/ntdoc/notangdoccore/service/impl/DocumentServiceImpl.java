@@ -131,7 +131,12 @@ public class DocumentServiceImpl implements DocumentService {
         Document document = getDocumentById(documentId, kcUserId);
 
         // 物理删除
-        documentRepository.delete(document);
+        try{
+            documentRepository.delete(document);
+            fileStorageService.deleteFile(document.getS3Key());
+        } catch (Exception e) {
+            log.error("Failed to delete document: {},{}", documentId, e.getMessage());
+        }
         // 软删除：只是更新状态，可恢复
 //        document.setStatus(Document.DocumentStatus.DELETED);
 //        documentRepository.save(document);
