@@ -39,8 +39,6 @@ import java.util.List;
 @Tag(name = "文档管理", description = "文档上传、下载、删除等操作")
 public class DocumentController {
     private final DocumentService documentService;
-    //日志发布者
-    private final ApplicationEventPublisher eventPublisher;
     private final UserSyncService userSyncService;
 
     private final FileStorageService digitalOceanSpacesService;
@@ -71,47 +69,16 @@ public class DocumentController {
 
             DocumentUploadResponse response = documentService.uploadDocument(file, fileName, description, kcUserId);
 
-            log.info("Document uploaded successfully: documentId={}, userId={}",
-                    response.getDocumentId(), kcUserId);
-
-            // 成功后记录上传成功的日志
-            User user = userSyncService.ensureFromJwt(jwt);
-            Long documentId = response.getDocumentId();
-            String username = jwt.getClaimAsString("preferred_username");
-
-
-            eventPublisher.publishEvent(
-                    UserOperationEvent.success(
-                            this,
-                            ActorType.USER,
-                            username,
-                            user.getId(),
-                            documentId,
-                            OperationType.UPLOAD_DOCUMENT,
-                            fileName
-                    )
-            );
+            if (response != null) {
+                log.info("Document uploaded successfully: documentId={}, userId={}",
+                        response.getDocumentId(), kcUserId);
+            }
 
             return ResponseEntity.ok(ApiResponse.success("文件上传成功", response));
 
         } catch (IllegalArgumentException e) {
             log.warn("Invalid upload request: {}", e.getMessage());
-            // 发布上传失败日志
-            String username = jwt.getClaimAsString("preferred_username");
 
-            User user = userSyncService.ensureFromJwt(jwt);
-
-            eventPublisher.publishEvent(
-                    UserOperationEvent.fail(
-                            this,
-                            ActorType.USER,
-                            username,
-                            user.getId(),
-                            OperationType.UPLOAD_DOCUMENT,
-                            fileName,
-                            e.getMessage()
-                    )
-            );
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error(400, "请求参数错误: " + e.getMessage()));
         } catch (Exception e) {
@@ -138,45 +105,11 @@ public class DocumentController {
 
             log.info("Download URL generated successfully for document: {}", documentId);
 
-            // 记录下载日志
-            String username = jwt.getClaimAsString("preferred_username");
-            String documentName = documentService.getDocumentById(documentId,kcUserId).getStoredFilename();
-            User user = userSyncService.ensureFromJwt(jwt);
-
-            eventPublisher.publishEvent(
-                    UserOperationEvent.success(
-                            this,
-                            ActorType.USER,
-                            username,
-                            user.getId(),
-                            documentId,
-                            OperationType.DOWNLOAD_DOCUMENT,
-                            documentName
-                    )
-            );
 
             return ResponseEntity.ok(ApiResponse.success("获取下载链接成功", response));
 
         } catch (SecurityException e) {
             log.warn("Access denied for document {}: {}", documentId, e.getMessage());
-
-            // 记录下载失败日志
-            String username = jwt.getClaimAsString("preferred_username");
-            String kcUserId = jwt.getClaimAsString("sub");
-            String documentName = documentService.getDocumentById(documentId,kcUserId).getStoredFilename();
-            User user = userSyncService.ensureFromJwt(jwt);
-
-            eventPublisher.publishEvent(
-                    UserOperationEvent.fail(
-                            this,
-                            ActorType.USER,
-                            username,
-                            user.getId(),
-                            OperationType.DOWNLOAD_DOCUMENT,
-                            documentName,
-                            e.getMessage()
-                    )
-            );
 
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.error(403, "无权访问该文档: " + e.getMessage()));
@@ -212,40 +145,35 @@ public class DocumentController {
     public ResponseEntity<DeleteDocumentResponse> deleteDocument(
             @PathVariable Long documentId,
             @AuthenticationPrincipal Jwt jwt) {
-        String kcUserId = jwt.getClaimAsString("sub");
+        try{
+            String kcUserId = jwt.getClaimAsString("sub");
 
-        Document document = documentService.getDocumentById(documentId, kcUserId);
+            Document document = documentService.getDocumentById(documentId, kcUserId);
 
-        documentService.deleteDocument(documentId, kcUserId);
+            documentService.deleteDocument(documentId, kcUserId);
 
-        DeleteDocumentResponse response = DeleteDocumentResponse.builder()
-                .code(200)
-                .message("文档删除成功")
-                .documentId(documentId)
-                .fileName(document.getOriginalFilename()) //.fileName(jwt.getClaimAsString("filename"))
-                .deletedAt(Instant.now())
-                .permanent(false)
-                .recoveryDeadline(Instant.now().plusSeconds(30 * 24 * 3600)) // 30天恢复期
-                .build();
+            DeleteDocumentResponse response = DeleteDocumentResponse.builder()
+                    .code(200)
+                    .message("文档删除成功")
+                    .documentId(documentId)
+                    .fileName(document.getOriginalFilename()) //.fileName(jwt.getClaimAsString("filename"))
+                    .deletedAt(Instant.now())
+                    .permanent(false)
+                    .recoveryDeadline(Instant.now().plusSeconds(30 * 24 * 3600)) // 30天恢复期
+                    .build();
 
-        // 记录删除文档日志
-        String username = jwt.getClaimAsString("preferred_username");
-        String documentName =document.getStoredFilename();
-        User user = userSyncService.ensureFromJwt(jwt);
+            return ResponseEntity.ok(response);
+        }catch (Exception e) {
+            log.error("Failed to delete document: documentId={}",
+                    documentId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(DeleteDocumentResponse.builder()
+                            .code(500)
+                            .message("删除文档失败: " + e.getMessage())
+                            .documentId(documentId)
+                            .build());
+        }
 
-        eventPublisher.publishEvent(
-                UserOperationEvent.success(
-                        this,
-                        ActorType.USER,
-                        username,
-                        user.getId(),
-                        documentId,
-                        OperationType.DELETE_DOCUMENT,
-                        documentName
-                )
-        );
-
-        return ResponseEntity.ok(response);
 //        return ResponseEntity.noContent().build(); // HTTP 204
     }
 
