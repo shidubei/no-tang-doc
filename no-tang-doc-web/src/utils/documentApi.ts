@@ -36,7 +36,7 @@ interface BackendListResp {
   documents?: BackendDocument[]; // fallback if backend returns at top-level
 }
 
-const DOCS_ENDPOINT = 'http://localhost:8070/api/v1/documents';
+const DOCS_ENDPOINT = import.meta.env.VITE_API_BASE_URL;
 
 function formatBytes(bytes: number | null | undefined): string {
   const b = typeof bytes === 'number' && isFinite(bytes) && bytes >= 0 ? bytes : 0;
