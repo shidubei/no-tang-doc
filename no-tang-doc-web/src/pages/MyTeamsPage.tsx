@@ -111,7 +111,7 @@ export function MyTeamsPage() {
             const resp: any = await http.post(`${TEAMS_API_PREFIX}`, payload);
             const body = resp?.data ?? resp ?? {};
             const statusOk = typeof resp?.status === 'number' ? (resp.status >= 200 && resp.status < 300) : false;
-            const successOk = body?.success === true;
+            const successOk = resp?.success === true;
             const ok = statusOk || successOk;
             if (!ok) {
                 throw new Error(body?.message || 'Create Team failed');
