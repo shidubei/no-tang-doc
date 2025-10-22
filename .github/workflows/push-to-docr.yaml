@@ -31,7 +31,7 @@ jobs:
       ${{
         github.event.workflow_run.conclusion == 'success' &&
         contains(fromJson('["main","dev","mod/core","feat/core/NTDOC-11-Setup-CI-CD-pipeline","feat/core/doks-deploy-test"]'), github.event.workflow_run.head_branch) &&
-        (github.event.workflow_run.event == 'push')
+        (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'pull_request' || github.event.workflow_run.event == 'workflow_dispatch')
       }}
     runs-on: ubuntu-latest
     outputs:

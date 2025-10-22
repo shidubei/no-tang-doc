@@ -11,6 +11,7 @@ on:
     paths:
       - 'no-tang-doc-core/**'
       - '.github/workflows/no-tang-doc-core-ci.yaml'
+      - '.github/workflows/push-to-docr.yaml'
   pull_request:
     branches:
       - main
@@ -19,7 +20,7 @@ on:
       - feat/core/NTDOC-11-Setup-CI-CD-pipeline
     paths:
       - 'no-tang-doc-core/**'
-
+  workflow_dispatch: {}
 defaults:
   run:
     working-directory: no-tang-doc-core
