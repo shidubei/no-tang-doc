@@ -7,6 +7,7 @@ on:
       - dev
       - mod/core
       - feat/core/NTDOC-11-Setup-CI-CD-pipeline
+      - feat/core/doks-deploy-test
     paths:
       - 'no-tang-doc-core/**'
       - '.github/workflows/no-tang-doc-core-ci.yaml'

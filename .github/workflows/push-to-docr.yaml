@@ -1,0 +1,72 @@
+name: push-to-docr
+
+on:
+  workflow_run:
+    workflows: ["no-tang-doc-core CI"]
+    types: [completed]
+    branches:                  # ✅ 让触发 CI 的分支受控（推荐）
+      - main
+      - dev
+      - mod/core
+      - feat/core/NTDOC-11-Setup-CI-CD-pipeline
+      - feat/core/doks-deploy-test   # ✅ 新增
+env:
+  REGISTRY: registry.digitalocean.com
+  REGISTRY_NAME: ntdoc
+  IMAGE_NAME: ntdoc-core
+  CHART_DIR: charts/ntdoc-core
+  RELEASE: ntdoc-core
+  NAMESPACE: ntdoc-core
+  INGRESS_HOST: api.ntdoc.site
+  APP_DIR: no-tang-doc-core          # ✅ 新增，指向子目录
+
+concurrency:
+  group: ntdoc-doks-dev
+  cancel-in-progress: true
+# Only proceed when CI succeeded on specific branches
+jobs:
+  build-and-push:
+    if: >-
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        contains(fromJson('["main","dev","mod/core","feat/core/NTDOC-11-Setup-CI-CD-pipeline","feat/core/doks-deploy-test"]'), github.event.workflow_run.head_branch) &&
+        github.event.workflow_run.event == 'push'
+      }}
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.TAG }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout same commit that passed CI
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}        # ✅ 关键
+
+      - name: Setup doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_ACCESS_TOKEN }}
+
+      - name: Docker login to DOCR via doctl
+        run: doctl registry login
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Compute tag
+        id: meta
+        run: echo "TAG=dev-${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+      - name: Build & Push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.APP_DIR }}                             # ✅ 指向子目录
+          file: ${{ env.APP_DIR }}/Dockerfile                     # ✅ 指向子目录的 Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.TAG }}
+            ${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:dev
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
