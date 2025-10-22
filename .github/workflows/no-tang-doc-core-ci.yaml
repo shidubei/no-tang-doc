@@ -7,11 +7,9 @@ on:
       - dev
       - mod/core
       - feat/core/NTDOC-11-Setup-CI-CD-pipeline
-      - feat/core/doks-deploy-test
     paths:
       - 'no-tang-doc-core/**'
       - '.github/workflows/no-tang-doc-core-ci.yaml'
-      - '.github/workflows/push-to-docr.yaml'
   pull_request:
     branches:
       - main
@@ -100,15 +98,11 @@ jobs:
           compression-level: 9
   push-to-docr:
     name: Push image to DOCR
-    needs: ci                         # 你的构建测试 job 的 id 就叫 "ci"
-    if: >-
-      ${{
-        needs.ci.result == 'success' &&
-        contains(fromJson('["main","dev","mod/core","feat/core/NTDOC-11-Setup-CI-CD-pipeline","feat/core/doks-deploy-test"]'), github.ref_name) &&
-        github.event_name == 'push'
-      }}
-    uses: ./.github/workflows/push-to-docr.yaml
+    needs: ci
+    # Only Dev ci passed then do the push and deploy
+    if: ${{ needs.ci.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    uses: ./.github/workflows/deploy-to-doks.yaml
     with:
       sha: ${{ github.sha }}
       branch: ${{ github.ref_name }}
-    secrets: inherit                  # 让 DO_ACCESS_TOKEN 等 secrets 透传
+    secrets: inherit

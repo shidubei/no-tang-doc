@@ -104,7 +104,7 @@ jobs:
 
       - name: Get kubeconfig for DOKS
         # 建议用 DOKS_CLUSTER_ID，更稳；若用名字则把 Secret 改成 DOKS_CLUSTER_NAME
-        run: doctl kubernetes cluster kubeconfig save "ntdoc-doks" --expiry-seconds 600
+        run: doctl kubernetes cluster kubeconfig save "${{ secrets.DOKS_CLUSTER_NAME }}" --expiry-seconds 600
         # run: doctl kubernetes cluster kubeconfig save "${{ secrets.DOKS_CLUSTER_NAME }}" --expiry-seconds 600
 
       - name: Ensure namespace & imagePullSecret
