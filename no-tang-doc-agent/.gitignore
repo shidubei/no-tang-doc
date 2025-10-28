@@ -7,3 +7,6 @@
 .vscode/
 __pycache__/
 node_modules/
+
+/fastagent.jsonl
+/fastagent.secrets.yaml

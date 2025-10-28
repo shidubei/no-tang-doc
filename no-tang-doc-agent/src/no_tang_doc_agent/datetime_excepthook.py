@@ -3,15 +3,12 @@ import sys
 import traceback as tb
 from types import TracebackType
 
-from .mcp_server import *
-from . import (
-    mcp_server,
-)
-
-__all__ = mcp_server.__all__
+__all__ = [
+    "apply_datetime_excepthook",
+]
 
 
-def _excepthook(
+def _datetime_excepthook(
     exc_type: type[BaseException],
     exc_value: BaseException,
     exc_traceback: TracebackType | None,
@@ -20,4 +17,5 @@ def _excepthook(
     tb.print_exception(exc_type, exc_value, exc_traceback)
 
 
-sys.excepthook = _excepthook
+def apply_datetime_excepthook() -> None:
+    sys.excepthook = _datetime_excepthook
