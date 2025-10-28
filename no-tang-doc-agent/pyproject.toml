@@ -1,9 +1,18 @@
 [project]
 name = "no-tang-doc-agent"
 version = "0.1.0"
-description = ""
+description = "no-tang-doc-agent"
 readme = "README.md"
-requires-python = ">=3.12"
+authors = [{ name = "Rocky Haotian Du", email = "2712479005@qq.com" }]
+requires-python = ">=3.13.5,<3.14"
 dependencies = [
-    "mcp[cli]>=1.18.0",
+    "fast-agent-mcp>=0.3.17",
+    "mcp[cli]>=1.19.0",
 ]
+
+[tool.uv]
+package = true
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
