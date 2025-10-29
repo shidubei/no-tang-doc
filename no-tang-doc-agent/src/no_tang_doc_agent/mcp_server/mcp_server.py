@@ -1,4 +1,3 @@
-from urllib.parse import urlparse
 import httpx
 from pydantic import AnyHttpUrl
 from typing import Any, Literal
@@ -15,7 +14,10 @@ BASE_URL = "https://api.ntdoc.site"
 
 
 class JWTTokenVerifier(TokenVerifier):
-    async def verify_token(self, token: str) -> AccessToken:
+    async def verify_token(
+        self,
+        token: str,
+    ) -> AccessToken:
         return AccessToken(
             token=token,
             client_id="no-tang-doc-mcp",
