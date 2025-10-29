@@ -1,45 +1,110 @@
 import httpx
+from collections.abc import Callable, Collection
+from contextlib import AbstractAsyncContextManager
+from dataclasses import dataclass
 from pydantic import AnyHttpUrl
 from typing import Any, Literal
 from mcp import ServerSession
-from mcp.server.fastmcp import Context, FastMCP
-from mcp.server.auth.provider import AccessToken, TokenVerifier
+from mcp.server.auth.provider import (
+    AccessToken,
+    OAuthAuthorizationServerProvider,
+    TokenVerifier,
+)
 from mcp.server.auth.settings import AuthSettings
+from mcp.server.fastmcp import Context, FastMCP
+from mcp.server.fastmcp.tools import Tool
+from mcp.server.lowlevel.server import LifespanResultT
+from mcp.server.streamable_http import EventStore
+from mcp.server.transport_security import TransportSecuritySettings
+from mcp.types import Icon
 
 __all__ = [
+    "JWTTokenVerifier",
+    "FastMCPSettings",
     "start_mcp_server",
 ]
 
 
+class JWTTokenVerifier(TokenVerifier):
+    async def verify_token(
+        self,
+        token: str,
+    ) -> AccessToken:
+        return AccessToken(
+            token=token,
+            client_id="no-tang-doc-mcp",
+            scopes=["mcp-user"],
+        )
+
+
+@dataclass
+class FastMCPSettings:
+    name: str | None = None
+    instructions: str | None = None
+    website_url: str | None = None
+    icons: list[Icon] | None = None
+    auth_server_provider: OAuthAuthorizationServerProvider[Any, Any, Any] | None = None
+    token_verifier: TokenVerifier | None = None
+    event_store: EventStore | None = None
+    tools: list[Tool] | None = None
+    debug: bool = False
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+    host: str = "127.0.0.1"
+    port: int = 8000
+    mount_path: str = "/"
+    sse_path: str = "/sse"
+    message_path: str = "/messages/"
+    streamable_http_path: str = "/mcp"
+    json_response: bool = False
+    stateless_http: bool = False
+    warn_on_duplicate_resources: bool = True
+    warn_on_duplicate_tools: bool = True
+    warn_on_duplicate_prompts: bool = True
+    dependencies: Collection[str] = ()
+    lifespan: (
+        Callable[
+            [FastMCP[LifespanResultT]], AbstractAsyncContextManager[LifespanResultT]
+        ]
+        | None
+    ) = None
+    auth: AuthSettings | None = None
+    transport_security: TransportSecuritySettings | None = None
+
+
 def start_mcp_server(
     base_url: AnyHttpUrl = AnyHttpUrl("https://api.ntdoc.site"),
+    mcp_settings: FastMCPSettings | None = None,
     transport: Literal["streamable-http"] = "streamable-http",
     mount_path: str | None = None,
 ) -> None:
-    class JWTTokenVerifier(TokenVerifier):
-        async def verify_token(
-            self,
-            token: str,
-        ) -> AccessToken:
-            return AccessToken(
-                token=token,
-                client_id="no-tang-doc-mcp",
-                scopes=["mcp-user"],
-            )
-
+    if mcp_settings is None:
+        mcp_settings = FastMCPSettings()
     mcp = FastMCP(
-        name="no-tang-doc-agent-mcp-server",
-        instructions="",
-        debug=True,
-        log_level="INFO",
-        host="localhost",
-        port=8001,
-        token_verifier=JWTTokenVerifier(),
-        auth=AuthSettings(
-            issuer_url=AnyHttpUrl("https://auth.ntdoc.site/realms/ntdoc"),
-            resource_server_url=AnyHttpUrl("http://localhost:8001/mcp"),
-            required_scopes=["mcp-user"],
-        ),
+        name=mcp_settings.name,
+        instructions=mcp_settings.instructions,
+        website_url=mcp_settings.website_url,
+        icons=mcp_settings.icons,
+        auth_server_provider=mcp_settings.auth_server_provider,
+        token_verifier=mcp_settings.token_verifier,
+        event_store=mcp_settings.event_store,
+        tools=mcp_settings.tools,
+        debug=mcp_settings.debug,
+        log_level=mcp_settings.log_level,
+        host=mcp_settings.host,
+        port=mcp_settings.port,
+        mount_path=mcp_settings.mount_path,
+        sse_path=mcp_settings.sse_path,
+        message_path=mcp_settings.message_path,
+        streamable_http_path=mcp_settings.streamable_http_path,
+        json_response=mcp_settings.json_response,
+        stateless_http=mcp_settings.stateless_http,
+        warn_on_duplicate_resources=mcp_settings.warn_on_duplicate_resources,
+        warn_on_duplicate_tools=mcp_settings.warn_on_duplicate_tools,
+        warn_on_duplicate_prompts=mcp_settings.warn_on_duplicate_prompts,
+        dependencies=mcp_settings.dependencies,
+        lifespan=mcp_settings.lifespan,
+        auth=mcp_settings.auth,
+        transport_security=mcp_settings.transport_security,
     )
 
     @mcp.tool(
@@ -51,10 +116,9 @@ def start_mcp_server(
         ctx: Context[ServerSession, None],
         team_id: int,
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization},
         ) as client:
             response = await client.get(f"{base_url}/api/v1/teams/{team_id}")
             response.raise_for_status()
@@ -71,10 +135,9 @@ def start_mcp_server(
         name: str,
         description: str,
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization},
         ) as client:
             response = await client.put(
                 f"{base_url}/api/v1/teams/{team_id}",
@@ -95,10 +158,9 @@ def start_mcp_server(
         ctx: Context[ServerSession, None],
         team_id: int,
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.delete(
                 f"{base_url}/api/v1/teams/{team_id}",
@@ -118,10 +180,9 @@ def start_mcp_server(
         params = {}
         if active_only is not None:
             params["activeOnly"] = active_only
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.get(
                 f"{base_url}/api/v1/teams",
@@ -140,10 +201,9 @@ def start_mcp_server(
         name: str,
         description: str,
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.post(
                 f"{base_url}/api/v1/teams",
@@ -166,10 +226,9 @@ def start_mcp_server(
         member_id: int,
         role: str,
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.put(
                 f"{base_url}/api/v1/teams/{team_id}/members/{member_id}",
@@ -190,10 +249,9 @@ def start_mcp_server(
         team_id: int,
         member_id: int,
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.delete(
                 f"{base_url}/api/v1/teams/{team_id}/members/{member_id}",
@@ -214,10 +272,9 @@ def start_mcp_server(
         params = {}
         if active_only is not None:
             params["activeOnly"] = active_only
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.get(
                 f"{base_url}/api/v1/teams/{team_id}/members",
@@ -237,10 +294,9 @@ def start_mcp_server(
         user_kc_id: int,
         role: str,
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.post(
                 f"{base_url}/api/v1/teams/{team_id}/members",
@@ -261,10 +317,9 @@ def start_mcp_server(
         ctx: Context[ServerSession, None],
         team_id: int,
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.post(
                 f"{base_url}/api/v1/teams/{team_id}/members/leave",
@@ -288,10 +343,9 @@ def start_mcp_server(
             params["fileName"] = file_name
         if description is not None:
             params["description"] = description
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.post(
                 f"{base_url}/api/v1/documents/upload",
@@ -313,10 +367,9 @@ def start_mcp_server(
         params = {}
         if status is not None:
             params["status"] = status
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.get(
                 f"{base_url}/api/v1/documents",
@@ -339,10 +392,9 @@ def start_mcp_server(
         params["documentId"] = document_id
         if expiration_minutes is not None:
             params["expirationMinutes"] = expiration_minutes
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.get(
                 f"{base_url}/api/v1/documents/share",
@@ -360,10 +412,9 @@ def start_mcp_server(
         ctx: Context[ServerSession, None],
         document_id: int,
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.get(
                 f"{base_url}/api/v1/documents/download/{document_id}",
@@ -380,10 +431,9 @@ def start_mcp_server(
         ctx: Context[ServerSession, None],
         document_id: int,
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.get(
                 f"{base_url}/api/v1/documents/download/{document_id}",
@@ -404,10 +454,9 @@ def start_mcp_server(
         ctx: Context[ServerSession, None],
         document_id: int,
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.delete(
                 f"{base_url}/api/v1/documents/{document_id}",
@@ -423,10 +472,9 @@ def start_mcp_server(
     async def get_api_v1_logs_list(
         ctx: Context[ServerSession, None],
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.get(
                 f"{base_url}/api/v1/logs/list",
@@ -445,10 +493,9 @@ def start_mcp_server(
     ) -> Any:
         params = {}
         params["documentId"] = document_id
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.get(
                 f"{base_url}/api/v1/logs/documents",
@@ -469,10 +516,9 @@ def start_mcp_server(
         params = {}
         if period is not None:
             params["period"] = period
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.post(
                 f"{base_url}/api/v1/logs/count",
@@ -489,10 +535,9 @@ def start_mcp_server(
     async def get_api_auth_me(
         ctx: Context[ServerSession, None],
     ) -> Any:
+        authorization = ctx.request_context.request.headers["authorization"]
         async with httpx.AsyncClient(
-            headers={
-                "Authorization": ctx.request_context.request.headers["authorization"]
-            },
+            headers={"Authorization": authorization}
         ) as client:
             response = await client.get(
                 f"{base_url}/api/auth/me",
