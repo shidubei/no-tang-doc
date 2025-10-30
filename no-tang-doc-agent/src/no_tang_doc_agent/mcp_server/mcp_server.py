@@ -2,7 +2,6 @@ import httpx
 from collections.abc import Callable, Collection
 from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
-from pydantic import AnyHttpUrl
 from typing import Any, Literal
 from mcp import ServerSession
 from mcp.server.auth.provider import (
@@ -72,7 +71,7 @@ class FastMCPSettings:
 
 
 def start_mcp_server(
-    base_url: AnyHttpUrl = AnyHttpUrl("https://api.ntdoc.site"),
+    base_url: str = "https://api.ntdoc.site",
     mcp_settings: FastMCPSettings | None = None,
     transport: Literal["streamable-http"] = "streamable-http",
     mount_path: str | None = None,
