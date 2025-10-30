@@ -9,6 +9,7 @@ import com.ntdoc.notangdoccore.entity.logenum.OperationType;
 import com.ntdoc.notangdoccore.event.UserOperationEvent;
 import com.ntdoc.notangdoccore.exception.DocumentException;
 import com.ntdoc.notangdoccore.repository.DocumentRepository;
+import com.ntdoc.notangdoccore.repository.DocumentSpecification;
 import com.ntdoc.notangdoccore.repository.UserRepository;
 import com.ntdoc.notangdoccore.service.DocumentService;
 import com.ntdoc.notangdoccore.service.FileStorageService;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -337,6 +339,31 @@ public class DocumentServiceImpl implements DocumentService {
 
         User user = getUserByKcUserId(kcUserId);
         return documentRepository.findByUploadedByAndOriginalFilenameContainingIgnoreCaseOrderByCreatedAtDesc(user, nameOrKeyword.trim());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Document> filterDocuments(String kcUserId, String contentType, Instant start, Instant end) {
+        User user = getUserByKcUserId(kcUserId);
+
+        // 初始 Specification 直接用 uploadedBy 条件
+        Specification<Document> spec = DocumentSpecification.uploadedBy(user);
+
+        // 根据文件类型过滤
+        if (contentType != null && !contentType.isBlank()) {
+            spec = spec.and(DocumentSpecification.fileTypeEquals(contentType));
+        }
+
+        // 根据上传日期过滤
+        if (start != null) {
+            spec = spec.and(DocumentSpecification.uploadedAfter(start));
+        }
+
+        if (end != null) {
+            spec = spec.and(DocumentSpecification.uploadedBefore(end));
+        }
+
+        return documentRepository.findAll(spec);
     }
 
 }
