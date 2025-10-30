@@ -122,7 +122,9 @@ public class DocumentController {
         }
     }
 
-    // 获取指定用户的所有文档，支持按状态过滤
+    /**
+     * 获取指定用户的所有文档，支持按状态过滤
+     */
     @GetMapping
     public ResponseEntity<DocumentListResponse> getUserDocuments(
             @AuthenticationPrincipal Jwt jwt,
@@ -142,7 +144,9 @@ public class DocumentController {
         return ResponseEntity.ok(response);
     }
 
-    // 删除指定文档
+    /**
+     * 删除指定文档
+     */
     @DeleteMapping("/{documentId}")
     public ResponseEntity<DeleteDocumentResponse> deleteDocument(
             @PathVariable Long documentId,
@@ -339,4 +343,18 @@ public class DocumentController {
                     .body(ApiResponse.error(500, "查询失败: " + e.getMessage()));
         }
     }
+    /**
+     * 根据文件名搜索文档
+     */
+    @GetMapping("/search")
+    public ResponseEntity<DocumentListResponse> searchByFilename(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam("keyword") String keyword
+    ) {
+        String kcUserId = jwt.getClaimAsString("sub");
+        List<Document> docs = documentService.searchDocumentsByFilename(kcUserId, keyword);
+        DocumentListResponse response = DocumentListResponse.fromDocuments(docs);
+        return ResponseEntity.ok(response);
+    }
+
 }
