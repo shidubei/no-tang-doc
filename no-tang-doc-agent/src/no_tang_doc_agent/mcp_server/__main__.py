@@ -1,10 +1,10 @@
-from pydantic import AnyHttpUrl
 from mcp.server.auth.settings import AuthSettings
+from pydantic import AnyHttpUrl
 
 from no_tang_doc_agent.datetime_excepthook import apply_datetime_excepthook
 from no_tang_doc_agent.mcp_server import (
-    JWTTokenVerifier,
     FastMCPSettings,
+    JWTTokenVerifier,
     start_mcp_server,
 )
 

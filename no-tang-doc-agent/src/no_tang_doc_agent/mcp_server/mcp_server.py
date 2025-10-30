@@ -1,9 +1,10 @@
-import httpx
-import jwt
 from collections.abc import Callable, Collection
 from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
 from typing import Any, Literal
+
+import httpx
+import jwt
 from mcp import ServerSession
 from mcp.server.auth.provider import (
     AccessToken,

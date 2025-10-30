@@ -1,6 +1,6 @@
 from .mcp_server import (
-    JWTTokenVerifier,
     FastMCPSettings,
+    JWTTokenVerifier,
     start_mcp_server,
 )
 
