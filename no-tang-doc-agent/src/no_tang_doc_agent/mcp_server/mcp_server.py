@@ -1,4 +1,5 @@
 import httpx
+import jwt
 from collections.abc import Callable, Collection
 from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
@@ -28,11 +29,29 @@ class JWTTokenVerifier(TokenVerifier):
     async def verify_token(
         self,
         token: str,
-    ) -> AccessToken:
+    ) -> AccessToken | None:
+        _payload = jwt.decode(token, options={"verify_signature": False})
+        client_id = _payload.get("azp")
+        if client_id is None:
+            return None
+        _scope = _payload.get("scope")
+        if _scope is None:
+            return None
+        scopes = _scope.split() if _scope else []
+        expires_at = _payload.get("exp")
+        if expires_at is None:
+            return None
+        resource = None
+        _aud = _payload.get("aud")
+        if _aud is None:
+            return None
+        resource = " ".join(_aud)
         return AccessToken(
             token=token,
-            client_id="no-tang-doc-mcp",
-            scopes=["mcp-user"],
+            client_id=client_id,
+            scopes=scopes,
+            expires_at=expires_at,
+            resource=resource,
         )
 
 

@@ -1005,6 +1005,7 @@ source = { editable = "." }
 dependencies = [
     { name = "fast-agent-mcp" },
     { name = "mcp", extra = ["cli"] },
+    { name = "pyjwt" },
 ]
 
 [package.dev-dependencies]
@@ -1017,6 +1018,7 @@ dev = [
 requires-dist = [
     { name = "fast-agent-mcp", specifier = ">=0.3.17" },
     { name = "mcp", extras = ["cli"], specifier = ">=1.19.0" },
+    { name = "pyjwt", specifier = ">=2.10.1" },
 ]
 
 [package.metadata.requires-dev]
