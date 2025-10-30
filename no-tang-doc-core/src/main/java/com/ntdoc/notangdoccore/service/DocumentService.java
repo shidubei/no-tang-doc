@@ -72,4 +72,13 @@ public interface DocumentService {
      * @param documentId 文档ID
      */
     void incrementDownloadCount(Long documentId);
+
+    /**
+     * 按文件名搜索
+     *
+     * @param kcUserId 当前用户ID（用于权限验证）
+     * @param nameOrKeyword 文件名或关键字（不区分大小写）
+     * @return 文档列表
+     */
+    List<Document> searchDocumentsByFilename(String kcUserId, String nameOrKeyword);
 }

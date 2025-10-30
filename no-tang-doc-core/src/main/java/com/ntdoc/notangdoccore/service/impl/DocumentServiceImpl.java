@@ -7,6 +7,7 @@ import com.ntdoc.notangdoccore.entity.User;
 import com.ntdoc.notangdoccore.entity.logenum.ActorType;
 import com.ntdoc.notangdoccore.entity.logenum.OperationType;
 import com.ntdoc.notangdoccore.event.UserOperationEvent;
+import com.ntdoc.notangdoccore.exception.DocumentException;
 import com.ntdoc.notangdoccore.repository.DocumentRepository;
 import com.ntdoc.notangdoccore.repository.UserRepository;
 import com.ntdoc.notangdoccore.service.DocumentService;
@@ -186,6 +187,8 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public void deleteDocument(Long documentId, String kcUserId) {
+        log.info("Starting document delete for document: {} by user: {}", documentId, kcUserId);
+
         User user = getUserByKcUserId(kcUserId);
         Document document = getDocumentById(documentId, kcUserId);
 
@@ -322,4 +325,18 @@ public class DocumentServiceImpl implements DocumentService {
             return String.valueOf(System.currentTimeMillis());
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Document> searchDocumentsByFilename(String kcUserId, String nameOrKeyword) {
+        log.info("Searching document by name for keyword: {} by user: {}", nameOrKeyword, kcUserId);
+
+        if (nameOrKeyword == null || nameOrKeyword.isBlank()) {
+            throw new DocumentException("Search keyword must not be empty");
+        }
+
+        User user = getUserByKcUserId(kcUserId);
+        return documentRepository.findByUploadedByAndOriginalFilenameContainingIgnoreCaseOrderByCreatedAtDesc(user, nameOrKeyword.trim());
+    }
+
 }
