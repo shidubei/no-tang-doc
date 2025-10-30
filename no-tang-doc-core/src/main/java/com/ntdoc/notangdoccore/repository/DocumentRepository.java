@@ -25,6 +25,11 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     List<Document> findByUploadedByOrderByCreatedAtDesc(User uploadedBy);
 
     /**
+     * 根据原始文件名查找文件（模糊匹配、不区分大小写）
+     */
+    List<Document> findByUploadedByAndOriginalFilenameContainingIgnoreCaseOrderByCreatedAtDesc(User uploadedBy, String partialFilename);
+
+    /**
      * 根据S3键查找文档
      */
     Optional<Document> findByS3Key(String s3Key);
