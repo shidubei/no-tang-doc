@@ -46,7 +46,7 @@ class JWTTokenVerifier(TokenVerifier):
         _aud = _payload.get("aud")
         if _aud is None:
             return None
-        resource = " ".join(_aud)
+        resource = str(_aud)
         return AccessToken(
             token=token,
             client_id=client_id,
