@@ -3,6 +3,7 @@ package com.ntdoc.notangdoccore.repository;
 import com.ntdoc.notangdoccore.entity.Document;
 import com.ntdoc.notangdoccore.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -12,7 +13,7 @@ import java.util.Optional;
 /**
  * 文档数据访问层
  */
-public interface DocumentRepository extends JpaRepository<Document, Long> {
+public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSpecificationExecutor<Document> {
 
     /**
      * 根据用户和状态查找文档

@@ -251,4 +251,25 @@ public class DocumentController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 根据所有者、文件类型、上传日期进行过滤
+     */
+    @GetMapping("/filter")
+    public ResponseEntity<DocumentListResponse> filterDocuments(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam(value = "contentType", required = false) String contentType,
+            @RequestParam(value = "startDate", required = false) String startDateStr,
+            @RequestParam(value = "endDate", required = false) String endDateStr
+    ) {
+        String kcUserId = jwt.getClaimAsString("sub");
+
+        Instant start = startDateStr != null ? Instant.parse(startDateStr) : null;
+        Instant end = endDateStr != null ? Instant.parse(endDateStr) : null;
+
+        List<Document> docs = documentService.filterDocuments(kcUserId, contentType, start, end);
+
+        DocumentListResponse response = DocumentListResponse.fromDocuments(docs);
+        return ResponseEntity.ok(response);
+    }
+
 }
