@@ -230,6 +230,8 @@ For detailed Dockerfile configuration and build instructions, please refer to [`
 - **Total Tags**: 16 versions
 - **Last Updated**: 2025-11-01 12:38:10 UTC
 
+> **Note**: For comprehensive Agent service documentation including development setup, testing, deployment, and CI/CD workflows, please refer to [`no-tang-doc-agent/README.md`](no-tang-doc-agent/README.md).
+
 ---
 
 ### no-tang-doc-core (Backend API)
