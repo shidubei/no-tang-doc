@@ -14,24 +14,25 @@ on:
     secrets:
       DO_ACCESS_TOKEN:
         required: true
+      DOKS_CLUSTER_NAME:
+        required: true
       KEYCLOAK_CLIENT_SECRET:
         required: false
   workflow_dispatch:
     inputs:
       sha:
-        description: 'Commit SHA to build (leave empty for latest commit on selected branch)'
+        description: Commit SHA to build (leave empty for latest commit on selected branch)
         required: false
         type: string
       branch:
-        description: 'Branch to deploy from'
+        description: Branch to deploy from
         required: true
         type: choice
         options:
           - main
           - dev
           - mod/agent
-        default: 'dev'
-
+        default: dev
 
 env:
   REGISTRY: registry.digitalocean.com
