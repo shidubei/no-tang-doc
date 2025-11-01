@@ -5,6 +5,11 @@ on:
     workflows: ["ntdoc-web-quality"]
     types:
       - completed
+  workflow_dispatch:
+    push:
+      branches: [ "dev", "feat/web/NTDOC-79-FE-Test" ]
+      paths:
+        - "no-tang-doc-web/**"
 
 env:
   REGISTRY: registry.digitalocean.com
