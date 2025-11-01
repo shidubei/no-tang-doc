@@ -2,7 +2,7 @@ name: ntdoc-web-ci-and-push
 
 on:
   push:
-    branches: ["dev", "main", "mod/web"]
+    branches: ["dev", "main", "mod/web", "feat/web/NTDOC-79-FE-Test"]
     paths:
       - "no-tang-doc-web/**"
       - ".github/workflows/*.yml"
