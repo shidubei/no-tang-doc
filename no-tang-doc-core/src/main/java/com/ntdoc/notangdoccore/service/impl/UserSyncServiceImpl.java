@@ -1,7 +1,8 @@
-package com.ntdoc.notangdoccore.service;
+package com.ntdoc.notangdoccore.service.impl;
 
 import com.ntdoc.notangdoccore.entity.User;
 import com.ntdoc.notangdoccore.repository.UserRepository;
+import com.ntdoc.notangdoccore.service.UserSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -12,9 +13,10 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserSyncService {
+public class UserSyncServiceImpl implements UserSyncService {
     private final UserRepository userRepository;
 
+    @Override
     @Transactional
     public User ensureLocalUser(String username, String email) {
         Optional<User> existing = userRepository.findByUsername(username);
@@ -34,6 +36,7 @@ public class UserSyncService {
         return userRepository.save(u);
     }
 
+    @Override
     @Transactional
     public User ensureFromJwt(Jwt jwt){
         // Get the keycloak UUID
