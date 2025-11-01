@@ -167,10 +167,6 @@ no-tang-doc-agent/
 │           └── __main__.py
 ├── tests/
 │   └── test_mcp_server.py
-├── archive/
-│   ├── CLAUDE.md              # Development guidelines
-│   ├── MCP-README.md          # MCP SDK documentation
-│   └── uv速查表.md            # uv command reference
 ├── pyproject.toml             # Python project configuration
 ├── uv.lock                    # Dependency lock file
 ├── Dockerfile                 # Container image definition
@@ -625,10 +621,10 @@ curl https://auth.ntdoc.site/realms/ntdoc/.well-known/openid-configuration
 
 ### Internal Documentation
 
-- **Agent Development**: `/no-tang-doc-agent/archive/CLAUDE.md`
-- **MCP SDK Guide**: `/no-tang-doc-agent/archive/MCP-README.md`
-- **uv Reference**: `/no-tang-doc-agent/archive/uv速查表.md`
 - **Infrastructure Guide**: `/IaC/README.md`
+- **Agent Service**: `/no-tang-doc-agent/README.md`
+- **Core Service**: `/no-tang-doc-core/README.md`
+- **Web Service**: `/no-tang-doc-web/README.md`
 
 ### Support
 
