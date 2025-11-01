@@ -11,6 +11,7 @@ from no_tang_doc_agent.mcp_server import (
     start_mcp_server,
 )
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
