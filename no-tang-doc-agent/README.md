@@ -89,24 +89,32 @@ docker run -d \
 
 ### Using Docker Compose
 
-For local development with all services:
+For local development (assumes core backend is already running):
 
 ```bash
-# Start all services (agent + core + mysql + keycloak)
+# Step 1: Start backend services (if not already running)
+cd ../no-tang-doc-core
 docker-compose up -d
+cd ../no-tang-doc-agent
+
+# Step 2: Copy and configure environment variables (optional)
+cp .env.example .env
+# Edit .env if needed (default values should work for local development)
+
+# Step 3: Start agent service
+docker-compose up --build -d
 
 # View logs
 docker-compose logs -f agent
 
-# Stop all services
+# Stop service
 docker-compose down
 ```
 
-For testing agent service only:
-
-```bash
-docker-compose -f docker-compose.test.yml up -d
-```
+**Prerequisites:** 
+- no-tang-doc-core and keycloak must be running on host machine (ports 8070 and 8080)
+- The agent uses `host.docker.internal` to access services running on the host
+- For Linux users, ensure Docker version supports `host.docker.internal` or manually configure host IP
 
 ## Configuration
 
@@ -151,8 +159,8 @@ no-tang-doc-agent/
 ├── pyproject.toml               # Project configuration
 ├── uv.lock                      # Dependency lock file
 ├── Dockerfile                   # Docker image definition
-├── docker-compose.yml           # Docker Compose for full stack
-├── docker-compose.test.yml      # Docker Compose for testing
+├── docker-compose.yml           # Docker Compose configuration
+├── .env.example                 # Environment variables template
 └── README.md                    # This file
 ```
 
