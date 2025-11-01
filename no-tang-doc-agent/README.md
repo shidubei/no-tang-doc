@@ -160,6 +160,7 @@ no-tang-doc-agent/
 ├── uv.lock                      # Dependency lock file
 ├── Dockerfile                   # Docker image definition
 ├── docker-compose.yml           # Docker Compose configuration
+├── logging.yaml                 # Logging configuration
 ├── .env.example                 # Environment variables template
 └── README.md                    # This file
 ```
@@ -170,7 +171,7 @@ The project uses GitHub Actions for CI/CD:
 
 - **Linting**: `ruff check` and `ruff format --check`
 - **Testing**: `pytest` with coverage reports
-- **Coverage Threshold**: 90% minimum
+- **Coverage Threshold**: 95% minimum
 
 See `.github/workflows/no-tang-doc-agent-ci.yaml` for details.
 
