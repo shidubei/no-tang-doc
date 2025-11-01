@@ -55,6 +55,7 @@
 
 | Service | URL | Description |
 |---------|-----|-------------|
+| **Web** | https://ntdoc.site | Frontend User Interface |
 | **Agent** | https://agent.ntdoc.site | MCP Server API |
 | **Core** | https://api.ntdoc.site | Backend REST API |
 | **Auth** | https://auth.ntdoc.site | Keycloak Authentication |
@@ -299,8 +300,13 @@ The Web service provides the frontend user interface for the no-tang-doc system.
 #### Container Image
 
 - **Repository**: `registry.digitalocean.com/ntdoc/ntdoc-web:dev`
+- **Latest Tag**: `dev-6fc8fce`
 - **Total Tags**: 3 versions
 - **Last Updated**: 2025-11-01 04:20:40 UTC
+
+#### Kubernetes Deployment
+
+> **Note**: Web service deployment to Kubernetes is planned. Currently, the service is containerized and images are available in DOCR. For local development, see [`no-tang-doc-web/README.md`](no-tang-doc-web/README.md).
 
 #### Directory Structure
 
@@ -358,6 +364,7 @@ no-tang-doc-web/
 **Ingress Routes**
 ```
 139.59.221.243 (Load Balancer)
+    ├── ntdoc.site         → Web Frontend (80/443)
     ├── auth.ntdoc.site    → Keycloak (80/443)
     ├── api.ntdoc.site     → Core Service (80/443)
     └── agent.ntdoc.site   → Agent Service (80/443)
@@ -371,9 +378,9 @@ Registry: `registry.digitalocean.com/ntdoc`
 
 | Repository | Latest Tag | Total Tags | Last Updated |
 |------------|-----------|------------|--------------|
-| `ntdoc-agent` | dev | 16 | 2025-11-01 12:38 UTC |
+| `ntdoc-agent` | dev-ba4702b | 16 | 2025-11-01 12:38 UTC |
 | `ntdoc-core` | dev | 3 | 2025-11-01 04:11 UTC |
-| `ntdoc-web` | dev | 3 | 2025-11-01 04:20 UTC |
+| `ntdoc-web` | dev-6fc8fce | 3 | 2025-11-01 04:20 UTC |
 
 ### Authentication Service
 
