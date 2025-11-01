@@ -15,13 +15,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def _parse_required_scopes(ctx, param, value):
-    """Parse required_scopes from either CLI args or environment variable."""
-    # If value is from envvar (string), split by space
-    if isinstance(value, str):
-        return tuple(value.split())
-    # If value is from CLI (tuple), return as-is
-    return value
+class ScopesParamType(click.ParamType):
+    """Custom parameter type for parsing scopes from environment variable or CLI."""
+    name = "scopes"
+
+    def convert(self, value, param, ctx):
+        """Convert space-separated string to list of scopes."""
+        if isinstance(value, str):
+            # Split by space for environment variable
+            return value.split()
+        return value
 
 
 @click.command()
@@ -88,10 +91,9 @@ def _parse_required_scopes(ctx, param, value):
 @click.option(
     "--required-scopes",
     envvar="REQUIRED_SCOPES",
-    multiple=True,
-    default=["email", "profile", "mcp-user"],
-    callback=_parse_required_scopes,
-    help="Required OAuth2 scopes (can be specified multiple times). Can also be set via REQUIRED_SCOPES env var as space-separated string.",
+    type=ScopesParamType(),
+    default="email profile mcp-user",
+    help="Required OAuth2 scopes (space-separated string or can be specified multiple times).",
     show_default=True,
 )
 def main(
@@ -103,7 +105,7 @@ def main(
     port: int,
     issuer_url: str,
     resource_server_url: str,
-    required_scopes: tuple[str, ...],
+    required_scopes: list[str],
 ) -> None:
     logger.info(f"{base_url=}")
     logger.info(f"{name=}")
@@ -126,7 +128,7 @@ def main(
             auth=AuthSettings(
                 issuer_url=AnyHttpUrl(issuer_url),
                 resource_server_url=AnyHttpUrl(resource_server_url),
-                required_scopes=list(required_scopes),
+                required_scopes=required_scopes,
             ),
         ),
     )
