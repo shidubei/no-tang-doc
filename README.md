@@ -181,127 +181,24 @@ no-tang-doc-agent/
 └── README.md                  # Service documentation
 ```
 
-#### Configuration Files
+#### Configuration
 
-**pyproject.toml**
-```toml
-[project]
-name = "no-tang-doc-agent"
-version = "0.1.0"
-requires-python = ">=3.13.5,<3.14"
-dependencies = [
-    "fast-agent-mcp>=0.3.18",
-    "mcp[cli]>=1.19.0",
-    "pyjwt>=2.10.1",
-    "pyyaml>=6.0.3",
-]
-
-[project.scripts]
-no-tang-doc-agent-mcp-server = "no_tang_doc_agent.mcp_server.__main__:main"
-```
-
-**logging.yaml**
-```yaml
-version: 1
-disable_existing_loggers: false
-
-formatters:
-  default:
-    format: '%(asctime)s | %(name)s | %(levelname)s | %(message)s'
-    datefmt: '%Y-%m-%d %H:%M:%S'
-
-handlers:
-  console:
-    class: logging.StreamHandler
-    level: INFO
-    formatter: default
-    stream: ext://sys.stdout
-
-root:
-  level: INFO
-  handlers: [console]
-```
-
-**Environment Variables**
-```bash
-# Required
-BASE_URL=https://api.ntdoc.site
-ISSUER_URL=https://auth.ntdoc.site/realms/ntdoc
-RESOURCE_SERVER_URL=https://agent.ntdoc.site/mcp
-KEYCLOAK_CLIENT_SECRET=<secret>
-
-# Optional
-NAME=no-tang-doc-agent-mcp-server
-DEBUG=true
-LOG_LEVEL=INFO
-HOST=0.0.0.0
-PORT=8002
-REQUIRED_SCOPES=["email", "profile", "mcp-user"]
-```
+For detailed configuration instructions, environment variables, and setup guides, please refer to [`no-tang-doc-agent/README.md`](no-tang-doc-agent/README.md).
 
 #### Development Workflow
 
-**Prerequisites**
-- Python 3.13.7+
-- uv package manager
-- Docker (optional, for local containerization)
+For detailed development setup, testing procedures, linting, and Docker workflows, please refer to [`no-tang-doc-agent/README.md`](no-tang-doc-agent/README.md).
 
-**Setup**
+**Quick Start**
 ```bash
-# Navigate to agent directory
 cd no-tang-doc-agent
-
-# Sync dependencies (creates .venv automatically)
 uv sync --all-extras --dev
-
-# Run the MCP server
 uv run no-tang-doc-agent-mcp-server
 ```
 
-**Testing**
-```bash
-# Run tests with coverage (95% required)
-uv run pytest tests/ \
-  --cov=src/no_tang_doc_agent/mcp_server \
-  --cov-report=xml \
-  --cov-report=term-missing \
-  --cov-report=html \
-  --cov-fail-under=95 \
-  --cov-branch
-
-# View HTML coverage report
-open coverage_html/index.html
-```
-
-**Linting & Formatting**
-```bash
-# Run ruff check
-uv run ruff check src/ tests/ --output-format=github
-
-# Run ruff format check
-uv run ruff format --check src/ tests/
-
-# Auto-fix issues
-uv run ruff check --fix src/ tests/
-uv run ruff format src/ tests/
-```
-
-**Local Development with Docker**
-```bash
-# Build and run with docker-compose
-docker-compose up --build
-
-# Run in detached mode
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-```
-
 #### Kubernetes Deployment
+
+For detailed Helm chart configuration and deployment instructions, please refer to [`no-tang-doc-agent/README.md`](no-tang-doc-agent/README.md).
 
 **Current Status**
 - **Namespace**: `ntdoc-agent`
@@ -311,134 +208,31 @@ docker-compose down
 - **External IP**: `139.59.221.243`
 - **Ports**: 8002 (internal), 80/443 (ingress)
 
-**Helm Chart Structure**
-```
-charts/ntdoc-agent/
-├── Chart.yaml
-├── values.yaml
-└── templates/
-    ├── deployment.yaml
-    ├── service.yaml
-    ├── ingress.yaml
-    ├── configmap.yaml
-    └── secret.yaml
-```
-
-**Deployment Command**
-```bash
-helm upgrade --install ntdoc-agent charts/ntdoc-agent \
-  -n ntdoc-agent --create-namespace \
-  --set image.repository=registry.digitalocean.com/ntdoc/ntdoc-agent \
-  --set image.tag=dev-ba4702b \
-  --set ingress.hosts[0].host=agent.ntdoc.site \
-  --set-string secrets.KEYCLOAK_CLIENT_SECRET='<secret>'
-```
-
 #### CI/CD Workflows
+
+For detailed CI/CD workflow configurations and deployment procedures, please refer to [`no-tang-doc-agent/README.md`](no-tang-doc-agent/README.md).
 
 **Agent CI (`.github/workflows/no-tang-doc-agent-ci.yaml`)**
 
-Triggers:
-- Push to: `main`, `dev`, `mod/agent`, `feat/agent/**`
-- Pull requests to: `main`, `dev`, `mod/agent`
-- Manual trigger: `workflow_dispatch`
-- Reusable: `workflow_call` (with `ref` parameter)
+Triggers: Push, PR, manual (`workflow_dispatch`), reusable (`workflow_call`)
 
-Jobs:
-1. **Lint** (~8s): Ruff code quality checks
-2. **Test** (~15s): Pytest with 95% coverage requirement
-3. **Deploy**: Calls CD workflow (only on push to protected branches)
-
-Features:
-- Skips CI for mod/agent ↔ dev sync PRs
-- Codecov integration
-- Auto-comments test results on PRs
-- Uploads test artifacts
+Jobs: Lint (~8s) → Test (~15s) → Deploy (calls CD workflow)
 
 **Agent CD (`.github/workflows/no-tang-doc-agent-cd.yaml`)**
 
-Triggers:
-- Called by CI workflow: `workflow_call`
-- Manual trigger: `workflow_dispatch` (with branch selection and optional SHA)
+Triggers: CI workflow call, manual trigger
 
-Jobs:
-1. **Build** (~37s): Docker image build and push to DOCR
-2. **Deploy** (~29s): Helm deployment to DOKS
-
-Features:
-- Automatic SHA resolution (fetches latest commit if not specified)
-- Image tagging strategy:
-  - `main` branch → `sha-<short>`, `latest`
-  - Other branches → `dev-<short>`, `dev`
-- BuildKit cache optimization (GHA cache)
-- GitHub Step Summary with deployment info
-
-**Workflow Architecture**
-```
-┌─────────────────────────────────────────┐
-│        GitHub Events                    │
-│  (push, PR, manual, workflow_call)      │
-└──────────────┬──────────────────────────┘
-               │
-       ┌───────▼────────┐
-       │   Agent CI     │  ← Reusable component
-       │  (3 jobs)      │     (workflow_call)
-       └───────┬────────┘
-               │
-        ┌──────▼──────┐
-        │   Lint      │  8s
-        └──────┬──────┘
-               │
-        ┌──────▼──────┐
-        │   Test      │  15s
-        └──────┬──────┘
-               │
-        ┌──────▼──────┐
-        │   Deploy    │  ← Calls CD workflow
-        └──────┬──────┘
-               │
-       ┌───────▼────────┐
-       │   Agent CD     │  ← Reusable component
-       │  (2 jobs)      │     (workflow_call)
-       └───────┬────────┘
-               │
-        ┌──────▼──────┐
-        │   Build     │  37s
-        └──────┬──────┘
-               │
-        ┌──────▼──────┐
-        │   Deploy    │  29s
-        └─────────────┘
-```
+Jobs: Build (~37s) → Deploy (~29s)
 
 #### Container Image
+
+For detailed Dockerfile configuration and build instructions, please refer to [`no-tang-doc-agent/README.md`](no-tang-doc-agent/README.md).
 
 **Registry**: DigitalOcean Container Registry (DOCR)
 - **Repository**: `registry.digitalocean.com/ntdoc/ntdoc-agent`
 - **Latest Tag**: `dev-ba4702b`
 - **Total Tags**: 16 versions
 - **Last Updated**: 2025-11-01 12:38:10 UTC
-
-**Dockerfile Highlights**
-```dockerfile
-FROM python:3.13-slim
-
-WORKDIR /app
-
-# Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
-
-# Copy project files
-COPY pyproject.toml uv.lock ./
-COPY logging.yaml ./
-COPY src ./src
-
-# Install dependencies
-RUN uv sync --frozen --no-dev --no-cache
-
-# Run MCP server
-CMD ["uv", "run", "no-tang-doc-agent-mcp-server"]
-```
 
 ---
 
@@ -606,26 +400,13 @@ Registry: `registry.digitalocean.com/ntdoc`
 
 ### Agent Service Development
 
-Refer to the [no-tang-doc-agent](#no-tang-doc-agent) section above for detailed development instructions.
+For comprehensive development guide including setup, testing, linting, and Docker workflows, please refer to [`no-tang-doc-agent/README.md`](no-tang-doc-agent/README.md).
 
 **Quick Start**
 ```bash
 cd no-tang-doc-agent
 uv sync --all-extras --dev
 uv run no-tang-doc-agent-mcp-server
-```
-
-**Key Commands**
-```bash
-# Testing
-uv run pytest tests/ --cov --cov-fail-under=95
-
-# Linting
-uv run ruff check src/ tests/
-uv run ruff format src/ tests/
-
-# Docker
-docker-compose up --build
 ```
 
 ### Branch Strategy
@@ -697,6 +478,8 @@ feat/{module}/* → mod/{module} → dev → main
 
 ### Infrastructure as Code
 
+For detailed Terraform configuration and usage, please refer to [`IaC/README.md`](IaC/README.md).
+
 **Terraform Modules**
 ```
 IaC/
@@ -712,38 +495,18 @@ IaC/
     └── ingress-nginx/   # Ingress controller
 ```
 
-**Terraform Workflow**
-```bash
-# Set DO credentials
-export AWS_ACCESS_KEY_ID="<spaces_key_id>"
-export AWS_SECRET_ACCESS_KEY="<spaces_secret>"
-
-# Initialize
-terraform init
-
-# Plan changes
-terraform plan
-
-# Apply changes
-terraform apply
-```
-
 ### Manual Deployment
 
-**Agent Service**
+For detailed deployment instructions and Helm configuration, please refer to service-specific README files:
+- Agent: [`no-tang-doc-agent/README.md`](no-tang-doc-agent/README.md)
+- Core: [`no-tang-doc-core/README.md`](no-tang-doc-core/README.md)
+- Web: [`no-tang-doc-web/README.md`](no-tang-doc-web/README.md)
+
+**Quick Example (Agent Service)**
 ```bash
-# Connect to cluster
 doctl kubernetes cluster kubeconfig save ntdoc-doks
-
-# Deploy with Helm
 helm upgrade --install ntdoc-agent charts/ntdoc-agent \
-  -n ntdoc-agent --create-namespace \
-  --set image.repository=registry.digitalocean.com/ntdoc/ntdoc-agent \
-  --set image.tag=dev \
-  --set ingress.hosts[0].host=agent.ntdoc.site \
-  --set-string secrets.KEYCLOAK_CLIENT_SECRET='<secret>'
-
-# Verify deployment
+  -n ntdoc-agent --create-namespace
 kubectl -n ntdoc-agent get all,ingress
 ```
 
@@ -805,16 +568,11 @@ feat(agent): Add workflow_dispatch support to CI workflow
 
 ### Testing Requirements
 
+For detailed testing procedures and coverage requirements, please refer to service-specific README files.
+
 **Agent Service**
 - Unit test coverage: ≥95%
-- All new features must have tests
-- Run tests locally before pushing
-- Check coverage report
-
-```bash
-cd no-tang-doc-agent
-uv run pytest tests/ --cov --cov-fail-under=95
-```
+- See [`no-tang-doc-agent/README.md`](no-tang-doc-agent/README.md) for testing guide
 
 ---
 
@@ -829,18 +587,11 @@ uv run pytest tests/ --cov --cov-fail-under=95
 
 ### Logging
 
+For detailed logging configuration, please refer to service-specific README files.
+
 **Agent Service**
 - Structured logging with YAML configuration
-- Log levels: DEBUG, INFO, WARNING, ERROR, CRITICAL
-- Kubernetes logs accessible via `kubectl logs`
-
-```bash
-# View agent logs
-kubectl -n ntdoc-agent logs -f deployment/ntdoc-agent-ntdoc-agent
-
-# View logs from specific time
-kubectl -n ntdoc-agent logs --since=1h deployment/ntdoc-agent-ntdoc-agent
-```
+- Kubernetes logs: `kubectl -n ntdoc-agent logs -f deployment/ntdoc-agent-ntdoc-agent`
 
 ### Health Checks
 
