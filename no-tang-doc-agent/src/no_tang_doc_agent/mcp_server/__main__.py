@@ -86,7 +86,7 @@ def main(
             token_verifier=JWTTokenVerifier(),
             auth=AuthSettings(
                 issuer_url=AnyHttpUrl(issuer_url),
-                resource_server_url=AnyHttpUrl(f"http://{host}:{port}/mcp"),
+                # resource_server_url=AnyHttpUrl(f"http://{host}:{port}/mcp"),
                 required_scopes=list(required_scopes),
             ),
         ),
