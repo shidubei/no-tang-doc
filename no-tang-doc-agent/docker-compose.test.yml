@@ -26,6 +26,7 @@ services:
       
       # Keycloak OAuth2/OIDC configuration
       ISSUER_URL: ${ISSUER_URL:-https://auth.ntdoc.site/realms/ntdoc}
+      RESOURCE_SERVER_URL: ${RESOURCE_SERVER_URL:-https://agent.ntdoc.site/mcp}
       REQUIRED_SCOPES: ${REQUIRED_SCOPES:-email profile mcp-user}
     command:
       - "--base-url"
@@ -40,6 +41,8 @@ services:
       - "8002"
       - "--issuer-url"
       - "${ISSUER_URL:-https://auth.ntdoc.site/realms/ntdoc}"
+      - "--resource-server-url"
+      - "${RESOURCE_SERVER_URL:-https://agent.ntdoc.site/mcp}"
       - "--required-scopes"
       - "${REQUIRED_SCOPES:-email profile mcp-user}"
     healthcheck:

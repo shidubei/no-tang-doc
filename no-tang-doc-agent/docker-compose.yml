@@ -28,6 +28,7 @@ services:
       
       # Keycloak OAuth2/OIDC configuration
       ISSUER_URL: ${ISSUER_URL:-http://auth.local:8080/realms/ntdoc}
+      RESOURCE_SERVER_URL: ${RESOURCE_SERVER_URL:-http://localhost:8002/mcp}
       REQUIRED_SCOPES: ${REQUIRED_SCOPES:-email profile mcp-user}
     command:
       - "--base-url"
@@ -43,6 +44,8 @@ services:
       - "8002"
       - "--issuer-url"
       - "${ISSUER_URL:-http://auth.local:8080/realms/ntdoc}"
+      - "--resource-server-url"
+      - "${RESOURCE_SERVER_URL:-http://localhost:8002/mcp}"
       - "--required-scopes"
       - "${REQUIRED_SCOPES:-email profile mcp-user}"
     networks:

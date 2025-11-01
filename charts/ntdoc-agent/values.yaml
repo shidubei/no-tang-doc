@@ -70,6 +70,7 @@ config:
   HOST: "0.0.0.0"
   PORT: "8002"
   ISSUER_URL: "https://auth.ntdoc.site/realms/ntdoc"
+  RESOURCE_SERVER_URL: "https://agent.ntdoc.site/mcp"
   REQUIRED_SCOPES: "email profile mcp-user"
 
 # Sensitive configuration (Secret)

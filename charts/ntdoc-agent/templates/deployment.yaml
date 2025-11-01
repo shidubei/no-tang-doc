@@ -63,6 +63,8 @@ spec:
             - "$(PORT)"
             - "--issuer-url"
             - "$(ISSUER_URL)"
+            - "--resource-server-url"
+            - "$(RESOURCE_SERVER_URL)"
             - "--required-scopes"
             - "$(REQUIRED_SCOPES)"
 
