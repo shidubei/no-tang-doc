@@ -122,22 +122,22 @@ Key variables (see `.env.example`):
 ### Branch Strategy
 
 - **Protected**: `main`, `dev`, `mod/*` (require PR)
-- **Development**: `feat/{module}/*` (e.g., `feat/agent/NTDOC-XX-Feature`)
+- **Development**: `feat/{module}/*` (e.g., `feat/agent/<name>`)
 
 **Typical workflow:**
 ```powershell
 # Create feature branch from dev
 git checkout dev
 git pull origin dev
-git checkout -b feat/agent/NTDOC-XX-Feature
+git checkout -b feat/agent/<name>
 
 # Make changes, commit, push
 git add .
-git commit -m "feat(agent): implement feature"
-git push -u origin feat/agent/NTDOC-XX-Feature
+git commit -m "feat(agent): Implement feature"
+git push -u origin feat/agent/<name>
 
 # Create PR to dev
-gh pr create --base dev --title "NTDOC-XX: Feature Name"
+gh pr create --base dev --title "<title>"
 ```
 
 ### Running Locally
