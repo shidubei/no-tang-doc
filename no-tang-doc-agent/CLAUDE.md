@@ -45,7 +45,7 @@ The agent is an MCP (Model Context Protocol) server that:
 
 - **URL**: https://github.com/rocky-d/no-tang-doc
 - **Default Branch**: `dev`
-- **Protected Branches**: `main`, `dev`, `mod/*` (require PR)
+- **Protected Branches**: `main`, `dev`, `docs`, `mod/*` (require PR)
 - **Development Branches**: `feat/{module}/*`
 
 ---
@@ -121,7 +121,7 @@ Key variables (see `.env.example`):
 
 ### Branch Strategy
 
-- **Protected**: `main`, `dev`, `mod/*` (require PR)
+- **Protected**: `main`, `dev`, `docs`, `mod/*` (require PR)
 - **Development**: `feat/{module}/*` (e.g., `feat/agent/<name>`)
 
 **Typical workflow:**
@@ -136,8 +136,8 @@ git add .
 git commit -m "feat(agent): Implement feature"
 git push -u origin feat/agent/<name>
 
-# Create PR to dev
-gh pr create --base dev --title "<title>"
+# Create PR to mod/agent (then mod/agent → dev → main)
+gh pr create --base mod/agent --title "<title>"
 ```
 
 ### Running Locally
@@ -284,7 +284,7 @@ Before pushing:
 1. **English-Only**: All code, comments, variable names in English (no exceptions)
 2. **Use uv**: Never use `python` or `pip` directly, always use `uv` commands
 3. **Working Directory**: Always in `/no-tang-doc-agent/` when running uv
-4. **Protected Branches**: Never push to `main`/`dev`/`mod/*` - use PR only
+4. **Protected Branches**: Never push to `main`/`dev`/`docs`/`mod/*` - use PR only
 5. **Test Coverage**: Minimum 95% coverage required
 6. **Type Hints**: Required for all function parameters and returns
 7. **Async First**: Use async/await for all I/O operations
@@ -295,6 +295,7 @@ Before pushing:
 - **Python**: 3.13.7+ (strictly enforced)
 - **OAuth**: All MCP tools require Keycloak authentication
 - **MCP Spec**: Follow https://modelcontextprotocol.io/specification
+- **Branch Flow**: feat/agent/* → mod/agent → dev → main
 
 ### Security
 
