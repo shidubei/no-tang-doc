@@ -10,15 +10,26 @@ from no_tang_doc_agent.mcp_server import (
 )
 
 
+def _parse_required_scopes(ctx, param, value):
+    """Parse required_scopes from either CLI args or environment variable."""
+    # If value is from envvar (string), split by space
+    if isinstance(value, str):
+        return tuple(value.split())
+    # If value is from CLI (tuple), return as-is
+    return value
+
+
 @click.command()
 @click.option(
     "--base-url",
+    envvar="BASE_URL",
     default="http://localhost:8070",
     help="Base URL for the MCP server",
     show_default=True,
 )
 @click.option(
     "--name",
+    envvar="SERVER_NAME",
     default="no-tang-doc-agent-mcp-server",
     help="Name of the MCP server",
     show_default=True,
@@ -32,6 +43,7 @@ from no_tang_doc_agent.mcp_server import (
 )
 @click.option(
     "--log-level",
+    envvar="LOG_LEVEL",
     default="INFO",
     type=click.Choice(
         ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
@@ -41,12 +53,14 @@ from no_tang_doc_agent.mcp_server import (
 )
 @click.option(
     "--host",
+    envvar="HOST",
     default="localhost",
     help="Host address to bind the server",
     show_default=True,
 )
 @click.option(
     "--port",
+    envvar="PORT",
     default=8002,
     type=int,
     help="Port number to bind the server",
@@ -54,21 +68,25 @@ from no_tang_doc_agent.mcp_server import (
 )
 @click.option(
     "--issuer-url",
+    envvar="ISSUER_URL",
     default="http://auth.local:8080/realms/ntdoc",
     help="OAuth2/OIDC issuer URL",
     show_default=True,
 )
 @click.option(
     "--resource-server-url",
+    envvar="RESOURCE_SERVER_URL",
     default="https://agent.ntdoc.site/mcp",
     help="Resource server URL",
     show_default=True,
 )
 @click.option(
     "--required-scopes",
+    envvar="REQUIRED_SCOPES",
     multiple=True,
     default=["email", "profile", "mcp-user"],
-    help="Required OAuth2 scopes (can be specified multiple times)",
+    callback=_parse_required_scopes,
+    help="Required OAuth2 scopes (can be specified multiple times). Can also be set via REQUIRED_SCOPES env var as space-separated string.",
     show_default=True,
 )
 def main(
