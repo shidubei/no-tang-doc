@@ -30,9 +30,6 @@ USER appuser
 # Expose default MCP server port
 EXPOSE 8002
 
-# Set PATH to include virtual environment binaries
-ENV PATH="/app/.venv/bin:$PATH"
-
 # Configure Python to run in unbuffered mode for better logging
 ENV PYTHONUNBUFFERED=1
 
