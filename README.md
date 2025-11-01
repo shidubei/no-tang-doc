@@ -640,7 +640,9 @@ For questions or issues:
 
 ## License
 
-[Specify your license here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2025 Rocky Haotian Du
 
 ---
 
