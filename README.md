@@ -419,6 +419,7 @@ uv run no-tang-doc-agent-mcp-server
 **Protected Branches**
 - `main`: Production releases
 - `dev`: Development integration
+- `docs`: Documentation updates (merges to `dev`)
 - `mod/*`: Module-specific main branches
   - `mod/agent`: Agent service
   - `mod/core`: Core service
@@ -426,20 +427,24 @@ uv run no-tang-doc-agent-mcp-server
 
 **Feature Branches**
 - `feat/{module}/*`: Feature development
-  - Example: `feat/agent/NTDOC-77-MCP-Server`
+  - Example: `feat/agent/<feature-name>`
 - `feat/*`: Project-wide features
-  - Example: `feat/project-documentation`
+  - Example: `feat/<feature-name>`
 
 **Workflow**
 ```
 feat/{module}/* → mod/{module} → dev → main
       ↓ PR           ↓ PR        ↓ PR
   Feature Dev    Module Merge  Dev Test
+
+feat/* (docs, etc.) → dev → main
+      ↓ PR            ↓ PR
+  Project Features  Dev Test
 ```
 
 **Rules**
-- Protected branches require Pull Requests
-- No direct pushes to `main`, `dev`, or `mod/*`
+- Protected branches (`main`, `dev`, `docs`, `mod/*`) require Pull Requests
+- No direct pushes to protected branches
 - CI must pass before merging
 - At least one approval required
 
