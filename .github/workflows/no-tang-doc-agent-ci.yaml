@@ -18,6 +18,7 @@ on:
       - mod/agent
     paths:
       - "no-tang-doc-agent/**"
+  workflow_dispatch: {}
 
 defaults:
   run:
