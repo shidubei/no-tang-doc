@@ -50,7 +50,7 @@ mcp:
       url: "https://huggingface.co/mcp?login"
     no-tang-doc-agent-mcp-server:
       transport: http
-      url: http://localhost:8004/mcp
+      url: https://agent.ntdoc.site/mcp
       auth:
         oauth: true
         redirect_port: 3030

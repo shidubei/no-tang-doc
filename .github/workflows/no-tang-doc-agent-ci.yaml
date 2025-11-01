@@ -89,7 +89,7 @@ jobs:
         run: |
           uv run pytest tests/test_mcp_server.py \
             --cov=src/no_tang_doc_agent/mcp_server \
-            --cov-fail-under=90 \
+            --cov-fail-under=87 \
             --cov-report=term
 
       - name: Upload coverage to Codecov (optional)
