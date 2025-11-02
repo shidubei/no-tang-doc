@@ -319,14 +319,11 @@ See `.github/workflows/no-tang-doc-agent-ci.yaml` for details.
 
 ## Contributing
 
-1. Create a feature branch from `dev`: `feat/agent/NTDOC-XX-description`
-2. Make your changes
-3. Ensure tests pass and coverage meets requirements
-4. Submit a pull request to `dev` branch
+Please refer to [CONTRIBUTING.md](../CONTRIBUTING.md) in the repository root for contribution guidelines.
 
 ## License
 
-[Add license information here]
+This project is licensed under the terms specified in [LICENSE](../LICENSE) in the repository root.
 
 ## Related Projects
 
