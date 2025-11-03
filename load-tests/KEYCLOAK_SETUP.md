@@ -86,12 +86,14 @@ This guide provides step-by-step instructions for configuring Keycloak 26.x to s
 
 1. Navigate to the **"Service accounts roles"** tab
 2. Click **"Assign role"**
-3. Filter by clients: Select **"Filter by clients"**
-4. Assign the following roles:
-   - `mcp-user` (if available)
-   - Any other roles required by your API
 
+#### Assign Realm Roles:
+3. Click **"Filter by realm roles"** (or ensure you're in the "Assign Realm roles" section)
+4. Search for and select:
+   - ✅ **`USER`** - Required for API access
 5. Click **"Assign"**
+
+**Note**: The service account uses client credentials flow and only needs the `USER` realm role to authenticate with the APIs. You do **NOT** need to assign client roles like `account` roles or administrative `realm-management` roles.
 
 ### Step 7: Configure Client Scopes
 
@@ -140,10 +142,23 @@ If you need to test with Resource Owner Password Credentials (password grant):
 
 1. Go to the **"Role mapping"** tab
 2. Click **"Assign role"**
-3. Assign appropriate roles:
-   - `USER` (realm role)
-   - `mcp-user` (if available)
-4. Click **"Assign"**
+
+#### Assign Realm Roles:
+3. Click **"Filter by realm roles"** (or ensure you're in the "Assign Realm roles" section)
+4. Search for and select:
+   - ✅ **`USER`** - Required for basic user access
+   - Optional: `offline_access` (if you need refresh tokens for long-running tests)
+5. Click **"Assign"**
+
+#### Assign Client Roles (Optional):
+6. Click **"Filter by clients"** to switch to "Assign Client roles" section
+7. From the **Client ID** dropdown, select **`account`**
+8. Assign the following account management roles:
+   - ✅ **`view-profile`** - Allows user to view their own profile
+   - ✅ **`manage-account`** - Allows user to manage their account
+9. Click **"Assign"**
+
+**Note**: You do **NOT** need to assign `realm-management` roles (like `manage-users`, `manage-clients`, etc.) for load testing users. These are administrative roles and should only be assigned to Keycloak administrators.
 
 ---
 
