@@ -34,7 +34,7 @@ public class KeycloakAdminService {
                 .build();
     }
 
-    public String createUser(String username, String email, String rawPassword, List<String> roles) {
+    public String createUser(String username, String email, String rawPassword) {
         try (Keycloak kc = adminClient()) {
             RealmResource realm = kc.realm(props.getRealm());
             UsersResource users = realm.users();
@@ -59,15 +59,6 @@ public class KeycloakAdminService {
                 users.get(userId).resetPassword(cred);
             }
 
-            if (roles != null && !roles.isEmpty()) {
-                List<RoleRepresentation> all = realm.roles().list();
-                List<RoleRepresentation> attach = all.stream()
-                        .filter(r -> roles.contains(r.getName()))
-                        .toList();
-                if (!attach.isEmpty()) {
-                    users.get(userId).roles().realmLevel().add(attach);
-                }
-            }
             return userId;
         }
     }
