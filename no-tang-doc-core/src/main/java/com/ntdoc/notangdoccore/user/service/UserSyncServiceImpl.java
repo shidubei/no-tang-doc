@@ -1,7 +1,7 @@
 package com.ntdoc.notangdoccore.user.service;
 
 import com.ntdoc.notangdoccore.user.repository.UserRepository;
-import com.ntdoc.notangdoccore.user.entity.User;
+import com.ntdoc.notangdoccore.user.domain.model.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;

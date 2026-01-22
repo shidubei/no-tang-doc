@@ -1,6 +1,6 @@
 package com.ntdoc.notangdoccore.user.repository;
 
-import com.ntdoc.notangdoccore.user.entity.User;
+import com.ntdoc.notangdoccore.user.domain.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

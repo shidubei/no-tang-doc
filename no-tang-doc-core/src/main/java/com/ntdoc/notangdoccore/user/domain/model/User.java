@@ -1,4 +1,4 @@
-package com.ntdoc.notangdoccore.user.entity;
+package com.ntdoc.notangdoccore.user.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
