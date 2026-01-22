@@ -37,7 +37,6 @@ public class SampleController {
                 req.getUsername(),
                 req.getEmail(),
                 req.getPassword(),
-                req.getRoles() == null || req.getRoles().isEmpty() ? List.of("USER") : req.getRoles()
         );
         return ResponseEntity.created(URI.create("/api/admin/users/" + userId)).body(Map.of("keycloakUserId", userId));
     }

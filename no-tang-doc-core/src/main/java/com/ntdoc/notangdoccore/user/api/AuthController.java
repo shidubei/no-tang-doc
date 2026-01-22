@@ -1,0 +1,119 @@
+package com.ntdoc.notangdoccore.user.api;
+
+import com.ntdoc.notangdoccore.config.AuthProperties;
+import com.ntdoc.notangdoccore.config.KeycloakClient;
+import com.ntdoc.notangdoccore.dto.keycloak.AuthExchangeRequest;
+import com.ntdoc.notangdoccore.keycloak.KeycloakAdminService;
+import com.ntdoc.notangdoccore.user.api.dto.LogoutRequest;
+import com.ntdoc.notangdoccore.user.api.dto.RefreshRequest;
+import com.ntdoc.notangdoccore.user.api.dto.RegistrationRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+// 用户认证注册以及登录
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+@Slf4j
+public class AuthController {
+    private final KeycloakClient keycloakClient;
+    private final AuthProperties authProperties;
+    private final KeycloakAdminService keycloakAdminService;
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegistrationRequest req) {
+        String userId = keycloakAdminService.createUser(
+                req.getUsername(),
+                req.getEmail(),
+                req.getPassword()
+        );
+        return ResponseEntity.created(URI.create("/api/admin/users/"+userId)).body(Map.of("keycloakUserId",userId));
+    }
+
+    @PostMapping("/exchange")
+    public ResponseEntity<?> exchange(@RequestBody AuthExchangeRequest req) {
+        try{
+            if (req.getRedirectUri() == null
+                    || authProperties.getAllowedRedirectUris() == null
+                    || authProperties.getAllowedRedirectUris().stream().noneMatch(r -> r.equalsIgnoreCase(req.getRedirectUri()))){;
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("success",false,"error","redirect_not_allow"));
+            }
+            if(req.getCode()==null || req.getCodeVerifier()==null){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("success",false,"error","missing_code_or_verifier"));
+            }
+            Map<String,Object> token = keycloakClient.exchangeCode(req);
+            return ResponseEntity.ok(token);
+        }catch(Exception e){
+            log.error("Exchange failure",e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success",false,"error","invalid_request"));
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody RefreshRequest req) {
+        if (req == null || req.getRefreshToken() == null || req.getRefreshToken().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("success", false, "error", "missing_refresh_token"));
+        }
+        try {
+            Map<String,Object> token = keycloakClient.refresh(req.getRefreshToken());
+            return ResponseEntity.ok(token);
+        } catch (Exception e) {
+            log.error("Refresh failed", e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "invalid_refresh_token"));
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me(Authentication auth) {
+        //检测是否登录，令牌是否有效
+        if(auth == null || !(auth instanceof JwtAuthenticationToken jwtAuth) || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "missing_token"));
+        }
+        // 获取Jwt
+        Jwt jwt = jwtAuth.getToken();
+        Map<String,Object> claims = jwt.getClaims();
+
+        List<String> roles = jwtAuth.getAuthorities().stream()
+                .map(a -> a.getAuthority())
+                .filter(a -> a.startsWith("ROLE_"))
+                .map(a -> a.substring(5))
+                .distinct()
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(Map.of(
+                "sub", claims.get("sub"),
+                "preferred_username", claims.getOrDefault("preferred_username", claims.get("sub")),
+                "email", claims.get("email"),
+                "name", claims.getOrDefault("name", claims.getOrDefault("preferred_username", claims.get("sub"))),
+                "roles", roles,
+                "claims", claims
+                ));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody(required = false) LogoutRequest body) {
+        try {
+            String refreshToken = body != null ? body.getRefreshToken() : null;
+            String idToken = body != null ? body.getIdToken() : null;
+            if (refreshToken == null && idToken == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("success", false, "error", "missing_refresh_or_id_token"));
+            }
+            keycloakClient.logout(refreshToken, idToken);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            log.warn("Logout failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "error", "logout_failed"));
+        }
+    }
+}
