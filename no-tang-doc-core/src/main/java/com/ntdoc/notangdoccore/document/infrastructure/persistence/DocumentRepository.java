@@ -1,4 +1,4 @@
-package com.ntdoc.notangdoccore.document.repository;
+package com.ntdoc.notangdoccore.document.infrastructure;
 
 import com.ntdoc.notangdoccore.document.domain.model.Document;
 import com.ntdoc.notangdoccore.user.domain.model.User;

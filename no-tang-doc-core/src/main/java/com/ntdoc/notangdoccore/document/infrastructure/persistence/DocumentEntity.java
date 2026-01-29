@@ -1,4 +1,4 @@
-package com.ntdoc.notangdoccore.document.domain.model;
+package com.ntdoc.notangdoccore.document.infrastructure.persistence;
 
 import com.ntdoc.notangdoccore.user.domain.model.User;
 import jakarta.persistence.*;
