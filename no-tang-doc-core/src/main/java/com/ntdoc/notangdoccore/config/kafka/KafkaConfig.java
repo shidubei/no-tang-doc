@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
+import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;
@@ -58,5 +60,18 @@ public class KafkaConfig {
     @Bean
     public KafkaTemplate<String,Object> kafkaTemplate(ProducerFactory<String,Object> producerFactory){
         return new KafkaTemplate<>(producerFactory);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String,Object> kafkaListenerContainerFactory(
+            ConsumerFactory<String,Object> cf
+    ){
+        ConcurrentKafkaListenerContainerFactory<String,Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(cf);
+
+        factory.setConcurrency(3);
+
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        return factory;
     }
 }
