@@ -1,7 +1,7 @@
 package com.ntdoc.notangdoccore.unit.controller;
 
 import com.ntdoc.notangdoccore.config.AuthProperties;
-import com.ntdoc.notangdoccore.config.KeycloakClient;
+import com.ntdoc.notangdoccore.config.keycloak.KeycloakClient;
 import com.ntdoc.notangdoccore.controller.AuthController;
 import com.ntdoc.notangdoccore.dto.keycloak.AuthExchangeRequest;
 import org.junit.jupiter.api.*;

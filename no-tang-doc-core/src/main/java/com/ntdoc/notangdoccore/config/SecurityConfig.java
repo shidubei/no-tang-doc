@@ -1,5 +1,6 @@
 package com.ntdoc.notangdoccore.config;
 
+import com.ntdoc.notangdoccore.config.keycloak.KeycloakProperties;
 import com.ntdoc.notangdoccore.security.KeycloakJwtGrantedAuthoritiesConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

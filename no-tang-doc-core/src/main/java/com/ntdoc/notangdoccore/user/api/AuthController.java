@@ -1,7 +1,7 @@
 package com.ntdoc.notangdoccore.user.api;
 
 import com.ntdoc.notangdoccore.config.AuthProperties;
-import com.ntdoc.notangdoccore.config.KeycloakClient;
+import com.ntdoc.notangdoccore.config.keycloak.KeycloakClient;
 import com.ntdoc.notangdoccore.dto.keycloak.AuthExchangeRequest;
 import com.ntdoc.notangdoccore.keycloak.KeycloakAdminService;
 import com.ntdoc.notangdoccore.user.api.dto.LogoutRequest;

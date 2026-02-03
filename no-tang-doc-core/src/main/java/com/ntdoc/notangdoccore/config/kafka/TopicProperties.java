@@ -1,11 +1,25 @@
 package com.ntdoc.notangdoccore.config.kafka;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/*
-题目描述:
-解题思路:
-时间复杂度:
-空间复杂度:
-*/
+@ConfigurationProperties(prefix = "app.kafka.topics")
 public class TopicProperties {
+    private String docEvents;
+    private String auditEvents;
+
+    public String getAuditEvents() {
+        return auditEvents;
+    }
+
+    public void setAuditEvents(String auditEvents) {
+        this.auditEvents = auditEvents;
+    }
+
+    public String getDocEvents() {
+        return docEvents;
+    }
+
+    public void setDocEvents(String docEvents) {
+        this.docEvents = docEvents;
+    }
 }

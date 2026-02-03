@@ -19,11 +19,14 @@ import java.time.Instant;
         @Index(name = "idx_document_created_at", columnList = "created_at"),
         @Index(name = "idx_document_status", columnList = "status")
 })
-public class Document {
+public class DocumentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "document_id",nullable = false,length = 36,unique = true)
+    private String documentId;
 
     @Column(name = "original_filename",nullable = false, length = 255)
     private String originalFilename;
@@ -42,6 +45,9 @@ public class Document {
 
     @Column(name = "s3_key", nullable = false, length = 500)
     private String s3Key;
+
+    @Column(name = "etag",length = 128)
+    private String etag;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "user_id",nullable = false)

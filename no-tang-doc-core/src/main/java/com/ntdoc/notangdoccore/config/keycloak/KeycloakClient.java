@@ -1,4 +1,4 @@
-package com.ntdoc.notangdoccore.config;
+package com.ntdoc.notangdoccore.config.keycloak;
 
 import com.ntdoc.notangdoccore.dto.keycloak.AuthExchangeRequest;
 import com.ntdoc.notangdoccore.exception.KeycloakClientException;

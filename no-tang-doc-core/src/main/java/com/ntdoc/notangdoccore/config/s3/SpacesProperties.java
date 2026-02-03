@@ -1,11 +1,17 @@
 package com.ntdoc.notangdoccore.config.s3;
 
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/*
-题目描述:
-解题思路:
-时间复杂度:
-空间复杂度:
-*/
+@Data
+@ConfigurationProperties(prefix="digitalocean.spaces")
 public class SpacesProperties {
+    private String endpoint;
+    private String region;
+    private String accessKey;
+    private String secretKey;
+
+    private String bucket;
+    private int presignMinutes = 15;
+    private String keyPrefix = "ntdoc";
 }

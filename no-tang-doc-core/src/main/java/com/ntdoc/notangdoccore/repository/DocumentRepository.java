@@ -18,7 +18,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
     /**
      * 根据用户和状态查找文档
      */
-    @Query("SELECT d FROM Document d " +
+    @Query("SELECT d FROM DocumentEntity d " +
             "LEFT JOIN FETCH d.tags " +
             "WHERE d.uploadedBy = :user AND d.status = :status " +
             "ORDER BY d.createdAt DESC")
@@ -28,7 +28,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
     /**
      * 根据用户查找所有文档
      */
-    @Query("SELECT d FROM Document d " +
+    @Query("SELECT d FROM DocumentEntity d " +
             "LEFT JOIN FETCH d.tags " +
             "WHERE d.uploadedBy = :user " +
             "ORDER BY d.createdAt DESC")
@@ -57,12 +57,12 @@ public interface DocumentRepository extends JpaRepository<Document, Long>, JpaSp
     /**
      * 统计用户的活跃文档数量
      */
-    @Query("SELECT COUNT(d) FROM Document d WHERE d.uploadedBy = :user AND d.status = :status")
+    @Query("SELECT COUNT(d) FROM DocumentEntity d WHERE d.uploadedBy = :user AND d.status = :status")
     long countByUploadedByAndStatus(@Param("user") User user, @Param("status") Document.DocumentStatus status);
 
     /**
      * 查找用户最近上传的文档
      */
-    @Query("SELECT d FROM Document d WHERE d.uploadedBy = :user AND d.status = 'ACTIVE' ORDER BY d.createdAt DESC")
+    @Query("SELECT d FROM DocumentEntity d WHERE d.uploadedBy = :user AND d.status = 'ACTIVE' ORDER BY d.createdAt DESC")
     List<Document> findRecentDocumentsByUser(@Param("user") User user);
 }

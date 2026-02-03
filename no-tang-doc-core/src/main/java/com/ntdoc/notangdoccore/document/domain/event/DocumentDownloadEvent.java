@@ -1,11 +1,21 @@
 package com.ntdoc.notangdoccore.document.domain.event;
 
+import lombok.Builder;
+import lombok.Value;
 
-/*
-题目描述:
-解题思路:
-时间复杂度:
-空间复杂度:
-*/
-public class DocumentDownloadEvent {
+import java.time.Instant;
+
+
+@Value
+@Builder
+public class DocumentDownloadEvent implements DocumentEvent{
+    String eventId;
+    String eventType;
+    Instant occurredAt;
+    String documentId;
+    String actorUserId;
+    int schemaVersion;
+
+    String bucket;
+    String objectKey;
 }

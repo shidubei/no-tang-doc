@@ -78,6 +78,10 @@ keycloak:
     secret: ${KEYCLOAK_CLIENT_SECRET:no-tang-doc-core-secret}
 
 app:
+  kafka:
+    topics:
+      doc-events: doc.events
+      audit-events: audit.events
   file:
     max-size: 52428800 # 50MB
     allowed-types: pdf,doc,docx,txt,png,jpg,jpeg,gif,zip,rar

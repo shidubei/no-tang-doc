@@ -1,7 +1,8 @@
-package com.ntdoc.notangdoccore.config;
+package com.ntdoc.notangdoccore.config.s3;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -15,28 +16,18 @@ import java.net.URI;
 
 @Slf4j
 @Configuration
+@EnableConfigurationProperties(SpacesProperties.class)
 public class SpacesConfig {
-    @Value("${digitalocean.spaces.endpoint}")
-    private String endpoint;
-
-    @Value("${digitalocean.spaces.region}")
-    private String region;
-
-    @Value("${digitalocean.spaces.access-key}")
-    private String accessKey;
-
-    @Value("${digitalocean.spaces.secret-key}")
-    private String secretKey;
 
     @Bean
-    public S3Client s3Client() {
-        log.info("Initializing DigitalOcean Spaces S3 Client with endpoint: {}, region: {}", endpoint, region);
+    public S3Client s3Client(SpacesProperties props) {
+        log.info("Initializing DigitalOcean Spaces S3 Client with endpoint: {}, region: {}", props.getEndpoint(), props.getRegion());
 
-        AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+        AwsBasicCredentials credentials = AwsBasicCredentials.create(props.getAccessKey(),props.getSecretKey());
 
         return S3Client.builder()
-                .endpointOverride(URI.create(endpoint))
-                .region(Region.of(region))
+                .endpointOverride(URI.create(props.getEndpoint()))
+                .region(Region.of(props.getEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(false)
@@ -45,14 +36,14 @@ public class SpacesConfig {
     }
 
     @Bean
-    public S3Presigner s3Presigner() {
+    public S3Presigner s3Presigner(SpacesProperties props) {
         log.info("Initializing S3 Presigner for DigitalOcean Spaces");
 
-        AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+        AwsBasicCredentials credentials = AwsBasicCredentials.create(props.getAccessKey(), props.getSecretKey());
 
         return S3Presigner.builder()
-                .endpointOverride(URI.create(endpoint))
-                .region(Region.of(region))
+                .endpointOverride(URI.create(props.getEndpoint()))
+                .region(Region.of(props.getRegion()))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .build();
     }
